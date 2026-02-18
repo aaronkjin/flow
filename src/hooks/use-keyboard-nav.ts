@@ -6,6 +6,8 @@ interface UseKeyboardNavOptions {
   itemCount: number;
   onSelect: (index: number) => void;
   enabled?: boolean;
+  /** Number of columns for 2D grid navigation. Left/Right moves within a row, Up/Down between rows. Default: 1. */
+  gridColumns?: number;
 }
 
 interface UseKeyboardNavReturn {
@@ -34,6 +36,7 @@ export function useKeyboardNav({
   itemCount,
   onSelect,
   enabled = true,
+  gridColumns = 1,
 }: UseKeyboardNavOptions): UseKeyboardNavReturn {
   const [rawFocusedIndex, setFocusedIndex] = useState(-1);
   const [focusSource, setFocusSource] = useState<"keyboard" | "mouse" | null>(
@@ -59,10 +62,22 @@ export function useKeyboardNav({
       if (isInputFocused()) return;
       if (itemCount === 0) return;
 
+      const cols = gridColumns;
+      const totalRows = Math.ceil(itemCount / cols);
+
       switch (e.key) {
         case "ArrowDown": {
           e.preventDefault();
-          const next = focusedIndex < itemCount - 1 ? focusedIndex + 1 : 0;
+          let next: number;
+          if (cols > 1 && focusedIndex >= 0) {
+            const row = Math.floor(focusedIndex / cols);
+            const col = focusedIndex % cols;
+            const nextRow = (row + 1) % totalRows;
+            const target = nextRow * cols + col;
+            next = target >= itemCount ? itemCount - 1 : target;
+          } else {
+            next = focusedIndex < itemCount - 1 ? focusedIndex + 1 : 0;
+          }
           setFocusedIndex(next);
           setFocusSource("keyboard");
           scrollToFocused(next);
@@ -70,10 +85,45 @@ export function useKeyboardNav({
         }
         case "ArrowUp": {
           e.preventDefault();
-          const prev = focusedIndex > 0 ? focusedIndex - 1 : itemCount - 1;
+          let prev: number;
+          if (cols > 1 && focusedIndex >= 0) {
+            const row = Math.floor(focusedIndex / cols);
+            const col = focusedIndex % cols;
+            const prevRow = (row - 1 + totalRows) % totalRows;
+            const target = prevRow * cols + col;
+            prev = target >= itemCount ? itemCount - 1 : target;
+          } else {
+            prev = focusedIndex > 0 ? focusedIndex - 1 : itemCount - 1;
+          }
           setFocusedIndex(prev);
           setFocusSource("keyboard");
           scrollToFocused(prev);
+          break;
+        }
+        case "ArrowRight": {
+          if (cols > 1 && focusedIndex >= 0) {
+            const col = focusedIndex % cols;
+            const target = focusedIndex + 1;
+            if (col + 1 < cols && target < itemCount) {
+              e.preventDefault();
+              setFocusedIndex(target);
+              setFocusSource("keyboard");
+              scrollToFocused(target);
+            }
+          }
+          break;
+        }
+        case "ArrowLeft": {
+          if (cols > 1 && focusedIndex >= 0) {
+            const col = focusedIndex % cols;
+            if (col > 0) {
+              e.preventDefault();
+              const target = focusedIndex - 1;
+              setFocusedIndex(target);
+              setFocusSource("keyboard");
+              scrollToFocused(target);
+            }
+          }
           break;
         }
         case "Enter": {
@@ -93,7 +143,7 @@ export function useKeyboardNav({
 
     document.addEventListener("keydown", handleKeyDown);
     return () => document.removeEventListener("keydown", handleKeyDown);
-  }, [enabled, itemCount, focusedIndex, onSelect, scrollToFocused]);
+  }, [enabled, itemCount, focusedIndex, onSelect, scrollToFocused, gridColumns]);
 
   const getItemProps = useCallback(
     (index: number) => ({

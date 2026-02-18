@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useLayoutEffect } from "react";
 import { Badge } from "@/components/ui/badge";
 import {
   Collapsible,
@@ -87,8 +87,22 @@ function formatEventLabel(type: TraceEventType): string {
   return type.replace(/_/g, " ");
 }
 
-export function TraceTimeline({ events }: { events: TraceEvent[] }) {
+interface TraceTimelineProps {
+  events: TraceEvent[];
+  /** When >= 0, this event index (in sorted order) is keyboard-focused and auto-expanded. */
+  kbFocusedIndex?: number;
+}
+
+export function TraceTimeline({ events, kbFocusedIndex }: TraceTimelineProps) {
   const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const eventRefs = useRef<Map<number, HTMLElement>>(new Map());
+
+  // Scroll focused event into view
+  useLayoutEffect(() => {
+    if (kbFocusedIndex == null || kbFocusedIndex < 0) return;
+    const el = eventRefs.current.get(kbFocusedIndex);
+    if (el) el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+  }, [kbFocusedIndex]);
 
   if (events.length === 0) {
     return (
@@ -102,10 +116,15 @@ export function TraceTimeline({ events }: { events: TraceEvent[] }) {
     (a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime()
   );
 
+  const isKbNavActive = kbFocusedIndex != null && kbFocusedIndex >= 0;
+
   return (
     <div className="space-y-2">
       {sorted.map((event, i) => {
-        const isOpen = openIds.has(event.id);
+        // In keyboard nav mode: only the focused event is expanded
+        // In manual mode: use openIds
+        const isOpen = isKbNavActive ? i === kbFocusedIndex : openIds.has(event.id);
+        const isKbFocused = isKbNavActive && i === kbFocusedIndex;
         const prevTime = i > 0 ? new Date(sorted[i - 1].timestamp).getTime() : null;
         const curTime = new Date(event.timestamp).getTime();
         const delta = prevTime !== null ? curTime - prevTime : null;
@@ -116,6 +135,7 @@ export function TraceTimeline({ events }: { events: TraceEvent[] }) {
             key={event.id}
             open={isOpen}
             onOpenChange={(open) => {
+              if (isKbNavActive) return; // Don't modify manual state during keyboard nav
               setOpenIds((prev) => {
                 const next = new Set(prev);
                 if (open) next.add(event.id);
@@ -124,7 +144,17 @@ export function TraceTimeline({ events }: { events: TraceEvent[] }) {
               });
             }}
           >
-            <div className="rounded-lg border border-border/60 bg-background transition-colors hover:bg-muted/20">
+            <div
+              ref={(el) => {
+                if (el) eventRefs.current.set(i, el);
+                else eventRefs.current.delete(i);
+              }}
+              className={`rounded-lg border transition-colors ${
+                isKbFocused
+                  ? "border-orange-500/30 bg-orange-500/[0.04] outline outline-2 outline-orange-500/50 outline-offset-[-2px]"
+                  : "border-border/60 bg-background hover:bg-muted/20"
+              }`}
+            >
               <CollapsibleTrigger className="flex items-center gap-3 w-full text-left px-5 py-3.5 group">
                 {/* Dot */}
                 <div className={`size-2.5 rounded-full shrink-0 ${dotColors[event.type]}`} />

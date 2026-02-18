@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
 import { useZoneNav } from "@/hooks/use-zone-nav";
@@ -27,17 +27,24 @@ function formatDuration(ms: number): string {
 
 export default function RunDetailPage() {
   const { runId } = useParams<{ runId: string }>();
+  const router = useRouter();
   const { setZones, activeZone } = useZoneNav();
   const [run, setRun] = useState<Run | null>(null);
   const [events, setEvents] = useState<TraceEvent[]>([]);
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [loading, setLoading] = useState(true);
+  const [traceNavActive, setTraceNavActive] = useState(false);
 
   useEffect(() => {
     setZones(["sidebar", "content"]);
   }, [setZones]);
 
   const isContentActive = activeZone === "content";
+
+  // Reset trace nav when leaving content zone
+  useEffect(() => {
+    if (!isContentActive) setTraceNavActive(false);
+  }, [isContentActive]);
 
   const fetchRunData = useCallback(async () => {
     try {
@@ -86,14 +93,50 @@ export default function RunDetailPage() {
     return () => window.removeEventListener("focus", onFocus);
   }, [fetchRunData]);
 
-  // Card count: Status + (Progress if workflow loaded) + Trace
+  // Card indices
   const cardCount = workflow ? 3 : 2;
+  const statusIdx = 0;
+  const progressIdx = workflow ? 1 : -1;
+  const traceIdx = workflow ? 2 : 1;
+
+  // Card-level nav: disabled when drilling into trace events
+  const cardOnSelect = useCallback(
+    (index: number) => {
+      if (index === statusIdx && run?.status === "waiting_for_review") {
+        router.push(`/review/${runId}`);
+      }
+      if (index === traceIdx) setTraceNavActive(true);
+    },
+    [statusIdx, traceIdx, run?.status, router, runId],
+  );
 
   const { getItemProps } = useKeyboardNav({
     itemCount: cardCount,
-    onSelect: () => {},
-    enabled: isContentActive,
+    onSelect: cardOnSelect,
+    enabled: isContentActive && !traceNavActive,
   });
+
+  // Trace event-level nav
+  const traceOnSelect = useCallback(() => {}, []);
+  const { focusedIndex: traceFocusedIndex } = useKeyboardNav({
+    itemCount: events.length,
+    onSelect: traceOnSelect,
+    enabled: traceNavActive,
+  });
+
+  // Escape from trace mode: capture phase prevents zone nav from also unlocking
+  useEffect(() => {
+    if (!traceNavActive) return;
+    function handleEscape(e: KeyboardEvent) {
+      if (e.key === "Escape") {
+        e.stopImmediatePropagation();
+        e.preventDefault();
+        setTraceNavActive(false);
+      }
+    }
+    document.addEventListener("keydown", handleEscape, true);
+    return () => document.removeEventListener("keydown", handleEscape, true);
+  }, [traceNavActive]);
 
   if (loading) {
     return (
@@ -120,20 +163,13 @@ export default function RunDetailPage() {
     return formatDuration(end - start);
   })();
 
-  // Card indices: 0=Status, 1=Progress(if workflow)|Trace, 2=Trace(if workflow)
-  const statusIdx = 0;
-  const progressIdx = workflow ? 1 : -1;
-  const traceIdx = workflow ? 2 : 1;
-
+  // Card outline: only use data-keyboard-focused (no mouse handlers on cards for sticky focus)
   const cardOutline = (idx: number) => {
     const props = getItemProps(idx);
     return props["data-keyboard-focused"]
       ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]"
       : "";
   };
-
-  const statusProps = getItemProps(statusIdx);
-  const traceProps = getItemProps(traceIdx);
 
   return (
     <div>
@@ -149,9 +185,7 @@ export default function RunDetailPage() {
         {/* Status section */}
         <Card
           className={cardOutline(statusIdx)}
-          ref={statusProps.ref}
-          onMouseEnter={statusProps.onMouseEnter}
-          onMouseLeave={statusProps.onMouseLeave}
+          ref={getItemProps(statusIdx).ref}
         >
           <CardHeader className="px-6 pt-6 pb-4">
             <div className="flex items-center gap-3">
@@ -206,13 +240,10 @@ export default function RunDetailPage() {
 
         {/* Step progress */}
         {workflow && (() => {
-          const progressProps = getItemProps(progressIdx);
           return (
             <Card
               className={cardOutline(progressIdx)}
-              ref={progressProps.ref}
-              onMouseEnter={progressProps.onMouseEnter}
-              onMouseLeave={progressProps.onMouseLeave}
+              ref={getItemProps(progressIdx).ref}
             >
               <CardHeader className="px-6 pt-6 pb-4">
                 <h2 className="font-heading text-lg">Step Progress</h2>
@@ -227,15 +258,16 @@ export default function RunDetailPage() {
         {/* Trace timeline */}
         <Card
           className={cardOutline(traceIdx)}
-          ref={traceProps.ref}
-          onMouseEnter={traceProps.onMouseEnter}
-          onMouseLeave={traceProps.onMouseLeave}
+          ref={getItemProps(traceIdx).ref}
         >
           <CardHeader className="px-6 pt-6 pb-4">
             <h2 className="font-heading text-lg">Trace Timeline</h2>
           </CardHeader>
           <CardContent className="px-6 pb-6">
-            <TraceTimeline events={events} />
+            <TraceTimeline
+              events={events}
+              kbFocusedIndex={traceNavActive ? traceFocusedIndex : undefined}
+            />
           </CardContent>
         </Card>
       </div>

@@ -70,8 +70,6 @@ export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps)
     <Card
       className={cardProps?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
       ref={cardProps?.ref}
-      onMouseEnter={cardProps?.onMouseEnter}
-      onMouseLeave={cardProps?.onMouseLeave}
     >
       <CardHeader className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">

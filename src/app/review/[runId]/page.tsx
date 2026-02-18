@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
 import { useZoneNav } from "@/hooks/use-zone-nav";
@@ -28,10 +28,12 @@ export default function ReviewDetailPage() {
   const hasJudge = !!review?.judgeAssessment;
   const cardCount = hasJudge ? 3 : 2;
 
+  const noOp = useCallback(() => {}, []);
   const { getItemProps } = useKeyboardNav({
     itemCount: cardCount,
-    onSelect: () => {},
+    onSelect: noOp,
     enabled: isContentActive,
+    gridColumns: hasJudge ? 2 : 1,
   });
 
   useEffect(() => {

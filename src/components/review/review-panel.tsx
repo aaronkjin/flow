@@ -131,8 +131,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
         <Card
           className={getCardProps?.(0)?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
           ref={getCardProps?.(0)?.ref}
-          onMouseEnter={getCardProps?.(0)?.onMouseEnter}
-          onMouseLeave={getCardProps?.(0)?.onMouseLeave}
         >
           <CardHeader className="px-6 pt-6 pb-4">
             <h2 className="font-heading text-lg">Output to Review</h2>
@@ -218,8 +216,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
       <Card
         className={actionProps?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
         ref={actionProps?.ref}
-        onMouseEnter={actionProps?.onMouseEnter}
-        onMouseLeave={actionProps?.onMouseLeave}
       >
         <CardContent className="p-6 space-y-4">
           <Textarea
