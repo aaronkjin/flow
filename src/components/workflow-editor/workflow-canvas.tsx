@@ -41,17 +41,27 @@ const defaultEdgeOptions = { type: "workflow", animated: true };
 
 interface WorkflowCanvasProps {
   workflow: UseWorkflowReturn;
+  focusedNodeId?: string;
 }
 
-export default function WorkflowCanvas({ workflow }: WorkflowCanvasProps) {
+export default function WorkflowCanvas({ workflow, focusedNodeId }: WorkflowCanvasProps) {
   const { onDragOver, onDrop } = useDragDrop(workflow.addNode);
 
   const snapGrid = useMemo<[number, number]>(() => [16, 16], []);
 
+  const displayNodes = useMemo(() => {
+    if (!focusedNodeId) return workflow.nodes;
+    return workflow.nodes.map((node) =>
+      node.id === focusedNodeId
+        ? { ...node, className: "ring-2 ring-orange-500/60 rounded-lg" }
+        : node
+    );
+  }, [workflow.nodes, focusedNodeId]);
+
   return (
     <div className="h-full w-full">
       <ReactFlow
-        nodes={workflow.nodes}
+        nodes={displayNodes}
         edges={workflow.edges}
         onNodesChange={workflow.onNodesChange}
         onEdgesChange={workflow.onEdgesChange}

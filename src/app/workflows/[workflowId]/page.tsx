@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useParams } from "next/navigation";
 import { ReactFlowProvider } from "@xyflow/react";
 import { useWorkflow } from "@/components/workflow-editor/hooks/use-workflow";
+import { useZoneNav } from "@/hooks/use-zone-nav";
+import { useCanvasNav } from "@/hooks/use-canvas-nav";
 import WorkflowCanvas from "@/components/workflow-editor/workflow-canvas";
 import { BlockPalette } from "@/components/workflow-editor/block-palette";
 import { ConfigPanel } from "@/components/workflow-editor/config-panel";
@@ -13,8 +15,31 @@ import { Loader2, PanelRight, PanelLeft } from "lucide-react";
 
 function EditorContent({ workflowId }: { workflowId: string }) {
   const workflow = useWorkflow(workflowId);
+  const { setZones, activeZone, isLocked } = useZoneNav();
   const [blocksCollapsed, setBlocksCollapsed] = useState(false);
   const [configCollapsed, setConfigCollapsed] = useState(false);
+
+  useEffect(() => {
+    setZones(["sidebar", "palette", "canvas", "config"]);
+  }, [setZones]);
+
+  const isCanvasLocked = activeZone === "canvas" && isLocked;
+  const isPaletteActive = activeZone === "palette";
+
+  const { focusedNodeId } = useCanvasNav({
+    nodes: workflow.nodes,
+    enabled: isCanvasLocked,
+    onSelectNode: (nodeId) => workflow.selectNode(nodeId),
+    onFocusNode: () => {},
+  });
+
+  const zoneOutline = (zone: string) => {
+    if (activeZone === zone && isLocked)
+      return "outline outline-2 outline-orange-500/80 outline-offset-[-2px] rounded-lg";
+    if (activeZone === zone)
+      return "outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-lg";
+    return "";
+  };
 
   if (workflow.isLoading) {
     return (
@@ -41,10 +66,16 @@ function EditorContent({ workflowId }: { workflowId: string }) {
             </Button>
           </div>
         ) : (
-          <BlockPalette onCollapse={() => setBlocksCollapsed(true)} />
+          <div className={`relative ${zoneOutline("palette")}`}>
+            <BlockPalette
+              onCollapse={() => setBlocksCollapsed(true)}
+              isActive={isPaletteActive}
+              addNode={workflow.addNode}
+            />
+          </div>
         )}
-        <div className="flex-1">
-          <WorkflowCanvas workflow={workflow} />
+        <div className={`flex-1 relative ${zoneOutline("canvas")}`}>
+          <WorkflowCanvas workflow={workflow} focusedNodeId={focusedNodeId ?? undefined} />
         </div>
         {configCollapsed ? (
           <div className="w-10 flex flex-col items-center border-l bg-muted/30 shrink-0 py-2">
@@ -59,10 +90,12 @@ function EditorContent({ workflowId }: { workflowId: string }) {
             </Button>
           </div>
         ) : (
-          <ConfigPanel
-            workflow={workflow}
-            onCollapse={() => setConfigCollapsed(true)}
-          />
+          <div className={`relative ${zoneOutline("config")}`}>
+            <ConfigPanel
+              workflow={workflow}
+              onCollapse={() => setConfigCollapsed(true)}
+            />
+          </div>
         )}
       </div>
     </div>

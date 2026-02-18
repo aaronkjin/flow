@@ -1,6 +1,7 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
 import {
   Sparkles,
   Scale,
@@ -148,7 +149,15 @@ const typeColors: Record<StepType, string> = {
   condition: "text-stone-400",
 };
 
-function PaletteItemCard({ item }: { item: PaletteItem }) {
+interface PaletteItemCardProps {
+  item: PaletteItem;
+  isKbFocused?: boolean;
+  focusRef?: (el: HTMLElement | null) => void;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
+}
+
+function PaletteItemCard({ item, isKbFocused, focusRef, onMouseEnter, onMouseLeave }: PaletteItemCardProps) {
   const Icon = item.icon;
 
   function onDragStart(event: React.DragEvent) {
@@ -165,9 +174,16 @@ function PaletteItemCard({ item }: { item: PaletteItem }) {
 
   return (
     <div
+      ref={focusRef}
       draggable
       onDragStart={onDragStart}
-      className="flex items-center gap-3 rounded-lg border border-border/60 px-3 py-2.5 cursor-grab active:cursor-grabbing hover:bg-muted/30 transition-colors"
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
+      className={`flex items-center gap-3 rounded-lg border px-3 py-2.5 cursor-grab active:cursor-grabbing transition-colors ${
+        isKbFocused
+          ? "bg-orange-500/[0.06] outline outline-2 outline-orange-500/50 outline-offset-[-2px] border-orange-500/30"
+          : "border-border/60 hover:bg-muted/30"
+      }`}
     >
       <Icon className={`size-4 shrink-0 ${typeColors[item.stepType]}`} />
       <div className="min-w-0">
@@ -182,9 +198,36 @@ function PaletteItemCard({ item }: { item: PaletteItem }) {
 
 interface BlockPaletteProps {
   onCollapse?: () => void;
+  isActive?: boolean;
+  addNode?: (
+    type: StepType,
+    position: { x: number; y: number },
+    options?: { label?: string; configOverrides?: Partial<Record<string, unknown>> }
+  ) => void;
 }
 
-export function BlockPalette({ onCollapse }: BlockPaletteProps): React.JSX.Element {
+export function BlockPalette({ onCollapse, isActive, addNode }: BlockPaletteProps): React.JSX.Element {
+  const flatItems = useMemo(
+    () => categories.flatMap((c) => c.items),
+    [],
+  );
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: flatItems.length,
+    onSelect: (index) => {
+      if (!addNode) return;
+      const item = flatItems[index];
+      addNode(item.stepType, { x: 300, y: 300 }, {
+        label: item.label,
+        configOverrides: item.dragData as Partial<Record<string, unknown>>,
+      });
+    },
+    enabled: isActive ?? false,
+  });
+
+  // Build a map from flat index to category/item for rendering
+  let flatIndex = 0;
+
   return (
     <div className="w-60 border-r bg-background flex flex-col h-full">
       <div className="px-4 py-4 border-b flex items-center justify-between gap-2">
@@ -210,9 +253,20 @@ export function BlockPalette({ onCollapse }: BlockPaletteProps): React.JSX.Eleme
                 {category.name}
               </h3>
               <div className="space-y-2">
-                {category.items.map((item) => (
-                  <PaletteItemCard key={item.label} item={item} />
-                ))}
+                {category.items.map((item) => {
+                  const idx = flatIndex++;
+                  const props = getItemProps(idx);
+                  return (
+                    <PaletteItemCard
+                      key={item.label}
+                      item={item}
+                      isKbFocused={props["data-keyboard-focused"]}
+                      focusRef={props.ref}
+                      onMouseEnter={props.onMouseEnter}
+                      onMouseLeave={props.onMouseLeave}
+                    />
+                  );
+                })}
               </div>
             </div>
           ))}

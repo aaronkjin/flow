@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useParams } from "next/navigation";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useZoneNav } from "@/hooks/use-zone-nav";
 import type { ReviewItem } from "@/lib/engine/types";
 import { Button } from "@/components/ui/button";
 import { ReviewPanel } from "@/components/review/review-panel";
@@ -11,9 +13,26 @@ import Link from "next/link";
 export default function ReviewDetailPage() {
   const { runId } = useParams<{ runId: string }>();
   const router = useRouter();
+  const { setZones, activeZone } = useZoneNav();
   const [review, setReview] = useState<ReviewItem | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setZones(["sidebar", "content"]);
+  }, [setZones]);
+
+  const isContentActive = activeZone === "content";
+
+  // Card count: Output + (Judge if present) + Action Bar
+  const hasJudge = !!review?.judgeAssessment;
+  const cardCount = hasJudge ? 3 : 2;
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: cardCount,
+    onSelect: () => {},
+    enabled: isContentActive,
+  });
 
   useEffect(() => {
     async function fetchReview() {
@@ -120,7 +139,7 @@ export default function ReviewDetailPage() {
         </div>
       </div>
 
-      <ReviewPanel review={review} />
+      <ReviewPanel review={review} getCardProps={getItemProps} />
     </div>
   );
 }

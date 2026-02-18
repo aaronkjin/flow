@@ -2,7 +2,9 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { useZoneNav } from "@/hooks/use-zone-nav";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -85,8 +87,18 @@ const SIDEBAR_COLLAPSED_KEY = "action-sidebar-collapsed";
 
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
   const [reviewCount, setReviewCount] = useState(0);
   const [collapsed, setCollapsed] = useState(false);
+  const { activeZone, isLocked } = useZoneNav();
+
+  const isSidebarActive = activeZone === "sidebar";
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: navItems.length,
+    onSelect: (index) => router.push(navItems[index].href),
+    enabled: isSidebarActive,
+  });
 
   useEffect(() => {
     const stored = localStorage.getItem(SIDEBAR_COLLAPSED_KEY) === "true";
@@ -127,6 +139,12 @@ export function Sidebar() {
     };
   }, []);
 
+  const zoneOutlineClass = isSidebarActive
+    ? isLocked
+      ? "outline outline-2 outline-orange-500/80 outline-offset-[-2px] rounded-lg"
+      : "outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-lg"
+    : "";
+
   return (
     <>
       {/* Mobile hamburger */}
@@ -146,9 +164,9 @@ export function Sidebar() {
 
       {/* Desktop sidebar */}
       <aside
-        className={`hidden md:flex md:flex-col h-screen border-r bg-background shrink-0 transition-[width] duration-200 ease-in-out ${
+        className={`hidden md:flex md:flex-col h-screen border-r bg-background shrink-0 transition-[width] duration-200 ease-in-out relative ${
           collapsed ? "w-12" : "w-60"
-        }`}
+        } ${zoneOutlineClass}`}
       >
         {collapsed ? (
           <div className="flex flex-col h-full">
@@ -161,18 +179,29 @@ export function Sidebar() {
               </Link>
             </div>
             <div className="flex flex-col items-center py-3 gap-3 flex-1">
-              {navItems.map((item) => {
+              {navItems.map((item, index) => {
                 const isActive =
                   item.href === "/"
                     ? pathname === "/"
                     : pathname.startsWith(item.href);
+                const itemProps = getItemProps(index);
+                const isKbFocused = itemProps["data-keyboard-focused"];
                 return (
                   <Button
                     key={item.href}
                     variant="ghost"
                     size="icon"
                     asChild
-                    className={isActive ? "bg-muted/50" : ""}
+                    ref={itemProps.ref}
+                    onMouseEnter={itemProps.onMouseEnter}
+                    onMouseLeave={itemProps.onMouseLeave}
+                    className={
+                      isKbFocused
+                        ? "bg-orange-500/[0.06] ring-2 ring-orange-500/50"
+                        : isActive
+                          ? "bg-muted/50"
+                          : ""
+                    }
                   >
                     <Link href={item.href} title={item.label}>
                       <item.icon className="size-5" />
@@ -204,19 +233,26 @@ export function Sidebar() {
               </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 px-3">
-              {navItems.map((item) => {
+              {navItems.map((item, index) => {
                 const isActive =
                   item.href === "/"
                     ? pathname === "/"
                     : pathname.startsWith(item.href);
+                const itemProps = getItemProps(index);
+                const isKbFocused = itemProps["data-keyboard-focused"];
                 return (
                   <Button
                     key={item.href}
                     variant="ghost"
+                    ref={itemProps.ref}
+                    onMouseEnter={itemProps.onMouseEnter}
+                    onMouseLeave={itemProps.onMouseLeave}
                     className={`w-full justify-start gap-2.5 text-sm font-normal ${
-                      isActive
-                        ? "bg-muted/50 font-medium border-l-2 border-foreground rounded-l-none"
-                        : ""
+                      isKbFocused
+                        ? "bg-orange-500/[0.06] ring-2 ring-orange-500/50 font-medium"
+                        : isActive
+                          ? "bg-muted/50 font-medium border-l-2 border-foreground rounded-l-none"
+                          : ""
                     }`}
                     asChild
                   >

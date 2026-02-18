@@ -2,6 +2,8 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useZoneNav } from "@/hooks/use-zone-nav";
 import { Header } from "@/components/layout/header";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -31,8 +33,21 @@ interface WorkflowSummary {
 
 export default function WorkflowsPage() {
   const router = useRouter();
+  const { setZones, activeZone, isLocked } = useZoneNav();
   const [workflows, setWorkflows] = useState<WorkflowSummary[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setZones(["sidebar", "content"]);
+  }, [setZones]);
+
+  const isContentActive = activeZone === "content";
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: workflows.length,
+    onSelect: (index) => router.push(`/workflows/${workflows[index].id}`),
+    enabled: isContentActive,
+  });
 
   const fetchWorkflows = useCallback(async () => {
     try {
@@ -74,6 +89,12 @@ export default function WorkflowsPage() {
     );
   }
 
+  const contentZoneOutline = isContentActive
+    ? isLocked
+      ? "outline outline-2 outline-orange-500/80 outline-offset-[-2px] rounded-lg"
+      : "outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-lg"
+    : "";
+
   return (
     <div>
       <Header
@@ -100,7 +121,7 @@ export default function WorkflowsPage() {
             </div>
           </div>
         ) : (
-          <Card>
+          <Card className={contentZoneOutline}>
             <Table>
               <TableHeader>
                 <TableRow>
@@ -112,20 +133,26 @@ export default function WorkflowsPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {workflows.map((wf) => (
+                {workflows.map((wf, index) => {
+                  const itemProps = getItemProps(index);
+                  const isKbFocused = itemProps["data-keyboard-focused"];
+                  return (
                   <TableRow
                     key={wf.id}
-                    className="cursor-pointer hover:bg-muted/30"
-                    onClick={() => router.push(`/workflows/${wf.id}`)}
+                    className={`cursor-pointer ${isKbFocused ? "bg-orange-500/[0.06] outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-md hover:bg-orange-500/[0.06]" : ""}`}
+                    ref={itemProps.ref}
+                    onMouseEnter={itemProps.onMouseEnter}
+                    onMouseLeave={itemProps.onMouseLeave}
+                    onClick={itemProps.onClick}
                   >
-                    <TableCell className="font-medium py-5">{wf.name}</TableCell>
-                    <TableCell className="text-muted-foreground max-w-[200px] truncate py-5">
+                    <TableCell className={`font-medium py-5 ${isKbFocused ? "text-orange-900/90" : ""}`}>{wf.name}</TableCell>
+                    <TableCell className={`max-w-[200px] truncate py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground"}`}>
                       {wf.description || "\u2014"}
                     </TableCell>
                     <TableCell className="text-center py-5">
                       {wf.steps?.length ?? 0}
                     </TableCell>
-                    <TableCell className="text-muted-foreground/70 py-5">
+                    <TableCell className={`py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground/70"}`}>
                       {new Date(wf.updatedAt).toLocaleDateString()}
                     </TableCell>
                     <TableCell className="py-5">
@@ -163,7 +190,8 @@ export default function WorkflowsPage() {
                       </DropdownMenu>
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </Card>

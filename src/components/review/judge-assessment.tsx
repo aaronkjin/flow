@@ -13,6 +13,12 @@ import { ChevronDown, ChevronRight, Sparkles } from "lucide-react";
 
 interface JudgeAssessmentProps {
   assessment: JudgeResult;
+  cardProps?: {
+    "data-keyboard-focused": boolean;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    ref: (el: HTMLElement | null) => void;
+  };
 }
 
 function recommendationBadge(rec: JudgeResult["recommendation"]) {
@@ -53,7 +59,7 @@ function confidenceColor(value: number) {
   return "bg-rose-400";
 }
 
-export function JudgeAssessment({ assessment }: JudgeAssessmentProps) {
+export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps) {
   const [reasoningOpen, setReasoningOpen] = useState(false);
 
   const sortedCriteria = Object.entries(assessment.criteriaScores).sort(
@@ -61,7 +67,12 @@ export function JudgeAssessment({ assessment }: JudgeAssessmentProps) {
   );
 
   return (
-    <Card>
+    <Card
+      className={cardProps?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
+      ref={cardProps?.ref}
+      onMouseEnter={cardProps?.onMouseEnter}
+      onMouseLeave={cardProps?.onMouseLeave}
+    >
       <CardHeader className="px-6 pt-6 pb-4">
         <div className="flex items-center justify-between">
           <h2 className="font-heading text-lg">Judge Assessment</h2>

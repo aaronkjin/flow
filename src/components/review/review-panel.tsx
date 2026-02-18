@@ -23,11 +23,19 @@ import { Loader2, ChevronDown, ChevronRight } from "lucide-react";
 import { JudgeAssessment } from "./judge-assessment";
 import { OutputEditor } from "./output-editor";
 
-interface ReviewPanelProps {
-  review: ReviewItem;
+interface CardProps {
+  "data-keyboard-focused": boolean;
+  onMouseEnter: () => void;
+  onMouseLeave: () => void;
+  ref: (el: HTMLElement | null) => void;
 }
 
-export function ReviewPanel({ review }: ReviewPanelProps) {
+interface ReviewPanelProps {
+  review: ReviewItem;
+  getCardProps?: (index: number) => CardProps;
+}
+
+export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
   const router = useRouter();
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -120,7 +128,12 @@ export function ReviewPanel({ review }: ReviewPanelProps) {
         className={`grid gap-6 ${hasJudge ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}
       >
         {/* Left Column — Content Under Review */}
-        <Card>
+        <Card
+          className={getCardProps?.(0)?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
+          ref={getCardProps?.(0)?.ref}
+          onMouseEnter={getCardProps?.(0)?.onMouseEnter}
+          onMouseLeave={getCardProps?.(0)?.onMouseLeave}
+        >
           <CardHeader className="px-6 pt-6 pb-4">
             <h2 className="font-heading text-lg">Output to Review</h2>
           </CardHeader>
@@ -190,12 +203,24 @@ export function ReviewPanel({ review }: ReviewPanelProps) {
 
         {/* Right Column — Judge Assessment */}
         {review.judgeAssessment && (
-          <JudgeAssessment assessment={review.judgeAssessment} />
+          <JudgeAssessment
+            assessment={review.judgeAssessment}
+            cardProps={getCardProps?.(1)}
+          />
         )}
       </div>
 
       {/* Bottom — Action Bar */}
-      <Card>
+      {(() => {
+        const actionIdx = hasJudge ? 2 : 1;
+        const actionProps = getCardProps?.(actionIdx);
+        return (
+      <Card
+        className={actionProps?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
+        ref={actionProps?.ref}
+        onMouseEnter={actionProps?.onMouseEnter}
+        onMouseLeave={actionProps?.onMouseLeave}
+      >
         <CardContent className="p-6 space-y-4">
           <Textarea
             placeholder="Add a comment (optional)..."
@@ -237,6 +262,8 @@ export function ReviewPanel({ review }: ReviewPanelProps) {
           </div>
         </CardContent>
       </Card>
+        );
+      })()}
 
       {/* Reject Confirmation Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>

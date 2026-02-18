@@ -1,6 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import { useRouter } from "next/navigation";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useZoneNav } from "@/hooks/use-zone-nav";
 import { Header } from "@/components/layout/header";
 import { Card } from "@/components/ui/card";
 import {
@@ -15,10 +18,18 @@ import { RunListTable } from "@/components/run/run-list-table";
 import type { Run, WorkflowDefinition } from "@/lib/engine/types";
 
 export default function RunsPage() {
+  const router = useRouter();
+  const { setZones, activeZone, isLocked } = useZoneNav();
   const [runs, setRuns] = useState<Run[]>([]);
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>("all");
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setZones(["sidebar", "content"]);
+  }, [setZones]);
+
+  const isContentActive = activeZone === "content";
 
   const fetchData = useCallback(async () => {
     try {
@@ -53,6 +64,20 @@ export default function RunsPage() {
     };
   }, [fetchData]);
 
+  const filteredRuns = useMemo(
+    () =>
+      selectedWorkflowId === "all"
+        ? runs
+        : runs.filter((r) => r.workflowId === selectedWorkflowId),
+    [runs, selectedWorkflowId],
+  );
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: filteredRuns.length,
+    onSelect: (index) => router.push(`/runs/${filteredRuns[index].id}`),
+    enabled: isContentActive,
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -61,10 +86,11 @@ export default function RunsPage() {
     );
   }
 
-  const filteredRuns =
-    selectedWorkflowId === "all"
-      ? runs
-      : runs.filter((r) => r.workflowId === selectedWorkflowId);
+  const contentZoneOutline = isContentActive
+    ? isLocked
+      ? "outline outline-2 outline-orange-500/80 outline-offset-[-2px] rounded-lg"
+      : "outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-lg"
+    : "";
 
   return (
     <div>
@@ -97,8 +123,8 @@ export default function RunsPage() {
             </div>
           </div>
         ) : (
-          <Card>
-            <RunListTable runs={filteredRuns} />
+          <Card className={contentZoneOutline}>
+            <RunListTable runs={filteredRuns} getItemProps={getItemProps} />
           </Card>
         )}
       </div>

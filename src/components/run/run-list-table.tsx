@@ -32,7 +32,19 @@ function getDuration(run: Run): string {
   return formatDuration(end - start);
 }
 
-export function RunListTable({ runs }: { runs: Run[] }) {
+interface RunListTableProps {
+  runs: Run[];
+  getItemProps?: (index: number) => {
+    "data-focused": boolean;
+    "data-keyboard-focused": boolean;
+    onMouseEnter: () => void;
+    onMouseLeave: () => void;
+    onClick: () => void;
+    ref: (el: HTMLElement | null) => void;
+  };
+}
+
+export function RunListTable({ runs, getItemProps }: RunListTableProps) {
   const router = useRouter();
 
   return (
@@ -46,26 +58,33 @@ export function RunListTable({ runs }: { runs: Run[] }) {
         </TableRow>
       </TableHeader>
       <TableBody>
-        {runs.map((run) => (
+        {runs.map((run, index) => {
+          const itemProps = getItemProps?.(index);
+          const isKbFocused = itemProps?.["data-keyboard-focused"] ?? false;
+          return (
           <TableRow
             key={run.id}
-            className="cursor-pointer hover:bg-muted/30"
-            onClick={() => router.push(`/runs/${run.id}`)}
+            className={`cursor-pointer ${isKbFocused ? "bg-orange-500/[0.06] outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-md hover:bg-orange-500/[0.06]" : ""}`}
+            ref={itemProps?.ref}
+            onMouseEnter={itemProps?.onMouseEnter}
+            onMouseLeave={itemProps?.onMouseLeave}
+            onClick={itemProps?.onClick ?? (() => router.push(`/runs/${run.id}`))}
           >
-            <TableCell className="font-medium py-5">
+            <TableCell className={`font-medium py-5 ${isKbFocused ? "text-orange-900/90" : ""}`}>
               {run.workflowName}
             </TableCell>
             <TableCell className="py-5">
               <RunStatusBadge status={run.status} />
             </TableCell>
-            <TableCell className="text-muted-foreground/70 py-5">
+            <TableCell className={`py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground/70"}`}>
               {new Date(run.createdAt).toLocaleString()}
             </TableCell>
-            <TableCell className="text-muted-foreground/70 py-5">
+            <TableCell className={`py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground/70"}`}>
               {getDuration(run)}
             </TableCell>
           </TableRow>
-        ))}
+          );
+        })}
       </TableBody>
     </Table>
   );

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Libre_Baskerville, Inter, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { Sidebar } from "@/components/layout/sidebar";
+import { ZoneNavProvider } from "@/hooks/use-zone-nav";
 
 const libreBaskerville = Libre_Baskerville({
   variable: "--font-heading",
@@ -35,10 +36,12 @@ export default function RootLayout({
       <body
         className={`${libreBaskerville.variable} ${inter.variable} ${geistMono.variable} antialiased`}
       >
-        <div className="flex h-screen">
-          <Sidebar />
-          <main className="flex-1 overflow-auto">{children}</main>
-        </div>
+        <ZoneNavProvider>
+          <div className="flex h-screen">
+            <Sidebar />
+            <main className="flex-1 overflow-auto">{children}</main>
+          </div>
+        </ZoneNavProvider>
       </body>
     </html>
   );

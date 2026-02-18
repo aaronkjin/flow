@@ -3,6 +3,8 @@
 import { useEffect, useState, useCallback } from "react";
 import { useParams } from "next/navigation";
 import Link from "next/link";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useZoneNav } from "@/hooks/use-zone-nav";
 import { Header } from "@/components/layout/header";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -25,10 +27,17 @@ function formatDuration(ms: number): string {
 
 export default function RunDetailPage() {
   const { runId } = useParams<{ runId: string }>();
+  const { setZones, activeZone } = useZoneNav();
   const [run, setRun] = useState<Run | null>(null);
   const [events, setEvents] = useState<TraceEvent[]>([]);
   const [workflow, setWorkflow] = useState<WorkflowDefinition | null>(null);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setZones(["sidebar", "content"]);
+  }, [setZones]);
+
+  const isContentActive = activeZone === "content";
 
   const fetchRunData = useCallback(async () => {
     try {
@@ -77,6 +86,15 @@ export default function RunDetailPage() {
     return () => window.removeEventListener("focus", onFocus);
   }, [fetchRunData]);
 
+  // Card count: Status + (Progress if workflow loaded) + Trace
+  const cardCount = workflow ? 3 : 2;
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: cardCount,
+    onSelect: () => {},
+    enabled: isContentActive,
+  });
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -102,6 +120,21 @@ export default function RunDetailPage() {
     return formatDuration(end - start);
   })();
 
+  // Card indices: 0=Status, 1=Progress(if workflow)|Trace, 2=Trace(if workflow)
+  const statusIdx = 0;
+  const progressIdx = workflow ? 1 : -1;
+  const traceIdx = workflow ? 2 : 1;
+
+  const cardOutline = (idx: number) => {
+    const props = getItemProps(idx);
+    return props["data-keyboard-focused"]
+      ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]"
+      : "";
+  };
+
+  const statusProps = getItemProps(statusIdx);
+  const traceProps = getItemProps(traceIdx);
+
   return (
     <div>
       <Header
@@ -114,7 +147,12 @@ export default function RunDetailPage() {
 
       <div className="p-8 space-y-8">
         {/* Status section */}
-        <Card>
+        <Card
+          className={cardOutline(statusIdx)}
+          ref={statusProps.ref}
+          onMouseEnter={statusProps.onMouseEnter}
+          onMouseLeave={statusProps.onMouseLeave}
+        >
           <CardHeader className="px-6 pt-6 pb-4">
             <div className="flex items-center gap-3">
               <h2 className="font-heading text-lg">Run Status</h2>
@@ -167,19 +205,32 @@ export default function RunDetailPage() {
         </Card>
 
         {/* Step progress */}
-        {workflow && (
-          <Card>
-            <CardHeader className="px-6 pt-6 pb-4">
-              <h2 className="font-heading text-lg">Step Progress</h2>
-            </CardHeader>
-            <CardContent className="px-6 pb-6">
-              <RunProgress run={run} steps={workflow.steps} />
-            </CardContent>
-          </Card>
-        )}
+        {workflow && (() => {
+          const progressProps = getItemProps(progressIdx);
+          return (
+            <Card
+              className={cardOutline(progressIdx)}
+              ref={progressProps.ref}
+              onMouseEnter={progressProps.onMouseEnter}
+              onMouseLeave={progressProps.onMouseLeave}
+            >
+              <CardHeader className="px-6 pt-6 pb-4">
+                <h2 className="font-heading text-lg">Step Progress</h2>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <RunProgress run={run} steps={workflow.steps} />
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Trace timeline */}
-        <Card>
+        <Card
+          className={cardOutline(traceIdx)}
+          ref={traceProps.ref}
+          onMouseEnter={traceProps.onMouseEnter}
+          onMouseLeave={traceProps.onMouseLeave}
+        >
           <CardHeader className="px-6 pt-6 pb-4">
             <h2 className="font-heading text-lg">Trace Timeline</h2>
           </CardHeader>

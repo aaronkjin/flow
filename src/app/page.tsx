@@ -1,7 +1,9 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
+import { useZoneNav } from "@/hooks/use-zone-nav";
 import { Header } from "@/components/layout/header";
 import { Card, CardContent } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
@@ -40,9 +42,30 @@ function getDuration(run: Run): string {
 
 export default function DashboardPage() {
   const router = useRouter();
+  const { setZones, activeZone, isLocked } = useZoneNav();
   const [workflows, setWorkflows] = useState<WorkflowDefinition[]>([]);
   const [runs, setRuns] = useState<Run[]>([]);
   const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setZones(["sidebar", "content"]);
+  }, [setZones]);
+
+  const isContentActive = activeZone === "content";
+
+  const { getItemProps } = useKeyboardNav({
+    itemCount: runs.length > 0 ? Math.min(runs.length, 10) : 0,
+    onSelect: (index) => {
+      const sorted = [...runs]
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 10);
+      router.push(`/runs/${sorted[index].id}`);
+    },
+    enabled: isContentActive,
+  });
 
   const fetchData = useCallback(async () => {
     try {
@@ -79,6 +102,17 @@ export default function DashboardPage() {
     };
   }, [fetchData]);
 
+  const recentRuns = useMemo(
+    () =>
+      [...runs]
+        .sort(
+          (a, b) =>
+            new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+        )
+        .slice(0, 10),
+    [runs],
+  );
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen">
@@ -98,12 +132,11 @@ export default function DashboardPage() {
       ? Math.round((completedRuns / (completedRuns + failedRuns)) * 100)
       : null;
 
-  const recentRuns = [...runs]
-    .sort(
-      (a, b) =>
-        new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    )
-    .slice(0, 10);
+  const contentZoneOutline = isContentActive
+    ? isLocked
+      ? "outline outline-2 outline-orange-500/80 outline-offset-[-2px] rounded-lg"
+      : "outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-lg"
+    : "";
 
   return (
     <div>
@@ -207,7 +240,7 @@ export default function DashboardPage() {
             </div>
           </div>
         ) : (
-          <Card>
+          <Card className={contentZoneOutline}>
             <div className="pl-6 pt-6 pb-4">
               <h2 className="font-heading text-lg">Recent Runs</h2>
             </div>
@@ -223,26 +256,33 @@ export default function DashboardPage() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {recentRuns.map((run) => (
+                {recentRuns.map((run, index) => {
+                  const itemProps = getItemProps(index);
+                  const isKbFocused = itemProps["data-keyboard-focused"];
+                  return (
                   <TableRow
                     key={run.id}
-                    className="cursor-pointer hover:bg-muted/30"
-                    onClick={() => router.push(`/runs/${run.id}`)}
+                    className={`cursor-pointer ${isKbFocused ? "bg-orange-500/[0.06] outline outline-2 outline-orange-500/50 outline-offset-[-2px] rounded-md hover:bg-orange-500/[0.06]" : ""}`}
+                    ref={itemProps.ref}
+                    onMouseEnter={itemProps.onMouseEnter}
+                    onMouseLeave={itemProps.onMouseLeave}
+                    onClick={itemProps.onClick}
                   >
-                    <TableCell className="font-medium py-5">
+                    <TableCell className={`font-medium py-5 ${isKbFocused ? "text-orange-900/90" : ""}`}>
                       {run.workflowName}
                     </TableCell>
                     <TableCell className="py-5">
                       <RunStatusBadge status={run.status} />
                     </TableCell>
-                    <TableCell className="text-muted-foreground/70 py-5">
+                    <TableCell className={`py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground/70"}`}>
                       {new Date(run.createdAt).toLocaleString()}
                     </TableCell>
-                    <TableCell className="text-muted-foreground/70 py-5">
+                    <TableCell className={`py-5 ${isKbFocused ? "text-orange-800/70" : "text-muted-foreground/70"}`}>
                       {getDuration(run)}
                     </TableCell>
                   </TableRow>
-                ))}
+                  );
+                })}
               </TableBody>
             </Table>
           </Card>
