@@ -36,6 +36,11 @@ yarn-error.log*
 # vercel
 .vercel
 
+# JSON file persistence (runtime data)
+/data/workflows/
+/data/runs/
+/data/traces/
+
 # typescript
 *.tsbuildinfo
 next-env.d.ts

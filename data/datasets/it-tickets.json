@@ -1,0 +1,470 @@
+{
+  "config": {
+    "id": "it-tickets",
+    "name": "IT Helpdesk Tickets",
+    "description": "Real IT support tickets from Console-AI/IT-helpdesk-synthetic-tickets on HuggingFace",
+    "source": "huggingface:Console-AI/IT-helpdesk-synthetic-tickets",
+    "fields": [
+      "ticket_id",
+      "subject",
+      "description",
+      "category",
+      "priority",
+      "requester_email",
+      "created_at"
+    ],
+    "itemCount": 50
+  },
+  "items": [
+    {
+      "ticket_id": "TKT-001",
+      "subject": "Hey IT! Our network printer keeps disconnecting.",
+      "description": "Hey IT! Our network printer keeps disconnecting intermittently and requires manual IP reconfiguration each time. It's becoming quite a hassle, especially during busy hours. A few folks in the office have mentioned they're experiencing the same issue. Could you look into this? Thanks!",
+      "category": "Network",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:36:55.004Z"
+    },
+    {
+      "ticket_id": "TKT-002",
+      "subject": "Re: [Acme IT] Re: Ticket #98765 - Access Issue with Shared Network Drive",
+      "description": "This is a follow-up to your previous request #98765 \"Access Issue with Shared Network Drive\"\n\nHello!\n\nI'm having trouble accessing the shared network drive. It used to work fine, but now I'm getting permission errors that seem quite complex. I believe it might require a detailed audit and manual adjustment to resolve.\n\nHere's a screenshot of the error message (https://acme.co/share/error-screenshot) . I've tried basic troubleshooting steps like checking my network connection and restarting my computer.\n\nThanks, and please let me know if there's anything else I should try!",
+      "category": "Network",
+      "priority": "high",
+      "requester_email": "user123@acme.co",
+      "created_at": "2024-10-28T18:36:56.156Z"
+    },
+    {
+      "ticket_id": "TKT-003",
+      "subject": "Software Conflict Causing App Crashes",
+      "description": "Hey team! :wave: We're experiencing some intermittent crashes on specific user machines. It seems like there might be a software conflict. Could you help us out with a detailed log analysis and some manual configuration adjustments? Thanks a ton! :pray:",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:36:54.644Z"
+    },
+    {
+      "ticket_id": "TKT-004",
+      "subject": "j.doe@acme.co Google Calendar Setup Assistance",
+      "description": "We need to set up a new Google Calendar for team scheduling. Please assist with the following steps: - Creating the calendar - Sharing with team members - Setting permissions",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "j.doe@acme.co",
+      "created_at": "2024-10-28T18:36:54.524Z"
+    },
+    {
+      "ticket_id": "TKT-005",
+      "subject": "Software Access: Asana Project for Jordan Smith",
+      "description": "Jordan Smith is part of the Project Management team and requires access to the Asana project to coordinate tasks and timelines effectively.",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jordan.smith@acme.co",
+      "created_at": "2024-10-28T18:36:54.816Z"
+    },
+    {
+      "ticket_id": "TKT-006",
+      "subject": "Email client sync issue",
+      "description": "Email client fails to sync with server due to suspected corrupted profile requiring manual profile reconstruction and data recovery",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:36:54.210Z"
+    },
+    {
+      "ticket_id": "TKT-007",
+      "subject": "Access Request: DB Storage Folder - john.doe@acme.co",
+      "description": "Notification from Acme IT\n\nAcme IT Image\n\nThis Access Request alert is to inform you that a request for access to the DB storage folder has been submitted.\n\nThe request details include:\n\nRequester: john.doe@acme.co (john.doe@acme.co)\n\nBy: Service Account (it-service@acme.co)\n\nDate: Mon, Oct 16 2023 14:32 UTC\n\nAccess Center is not enabled for this request. Access Center can provide additional details, investigation options, and approval recommendations. To enable, turn on access requests in the request detail page.\n\nGo to Request Details\n\nYou have received this important update about your Acme IT account because you are the designated admin recipient for this request type. You can turn off these alerts or change the email recipients in the Requests section of the Admin Console.\n\nAcme LLC 123 Innovation Drive Tech City, TX 75001\n\n-- \nYou received this message because you are subscribed to the Acme Groups \"IT Support\" group. To unsubscribe from this group and stop receiving emails from it, send an email to itsupport+unsubscribe@acme.co.",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "john.doe@acme.co",
+      "created_at": "2024-10-28T18:37:00.150Z"
+    },
+    {
+      "ticket_id": "TKT-008",
+      "subject": "Assistance Needed: Password Reset for Email Account",
+      "description": "I am unable to access my email account as I have forgotten the password. Could you please assist me in resetting it?",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:36:54.838Z"
+    },
+    {
+      "ticket_id": "TKT-009",
+      "subject": "Intranet Navigation Assistance",
+      "description": "Hello IT Team, I've been trying to access and navigate the company intranet but I'm having some trouble finding my way around. Could you provide some guidance or resources that might help? I'm hoping to get familiar with it soon as I have some tasks that require its use. Appreciate your help! -- Alex Jordan | Marketing Specialist",
+      "category": "Training",
+      "priority": "medium",
+      "requester_email": "alex.jordan@acme.co",
+      "created_at": "2024-10-28T18:36:54.857Z"
+    },
+    {
+      "ticket_id": "TKT-010",
+      "subject": "Workstation Security Configuration: Inconsistent Application of Group Policies",
+      "description": "Hello IT Team, I've noticed that the group policies on my workstation are not being applied consistently. Some security settings seem to revert to default after a restart, and certain applications are not being restricted as expected. This inconsistency is causing potential security vulnerabilities. Could you please investigate and ensure that the correct group policies are enforced across all workstations? Thank you!",
+      "category": "Security",
+      "priority": "high",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:36:55.126Z"
+    },
+    {
+      "ticket_id": "TKT-011",
+      "subject": "Persistent Authentication Failures with MFA",
+      "description": "I'm experiencing persistent authentication failures with our multi-factor authentication system. This issue requires a detailed investigation and manual synchronization of my user credentials across multiple platforms. Please assist at your earliest convenience.",
+      "category": "Security",
+      "priority": "high",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:37:12.056Z"
+    },
+    {
+      "ticket_id": "TKT-012",
+      "subject": "JIRA Board Access Request",
+      "description": "Hi IT Team, Alex (alex.jones@acme.co) will be collaborating with the Product Development team for the upcoming quarter, so he needs access to the following tools: JIRA- the Product Development Board. His Manager, Sam, is cc'd to provide manager approval. Please let me know if you have any questions or need additional information! Thanks, -- Jamie Lee | Manager, Product Development | She/Her Acme Co • Help Center • Submit a ticket",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "jamie.lee@acme.co",
+      "created_at": "2024-10-28T18:37:13.104Z"
+    },
+    {
+      "ticket_id": "TKT-013",
+      "subject": "Alert: Inconsistent VPN Connectivity - Network Analysis Required",
+      "description": "Notification from Acme Network Services\n\nAcme Network Image\n\nThis Inconsistent VPN Connectivity alert is to inform you that a user is experiencing irregular VPN connections that require detailed network analysis and manual configuration adjustments on both client and server sides.\n\nThe alert details include:\n\nUser: John Doe (john.doe@acme.co)\n\nBy: Network Monitoring System (net-monitor@acme.co)\n\nDate: Wed, Oct 25 2023 14:22 UTC\n\nNetwork Analysis is not enabled for this rule. Network Analysis can provide additional details, investigation options, and remediation recommendations. To enable, turn on network analysis in the rule detail page.\n\nGo to Rule Details\n\nYou have received this important update about your Acme Network account because you are the designated admin recipient for this alert type. You can turn off these alerts or change the email recipients in the Rules section of the Admin Console.\n\nAcme Corp 1234 Elm Street Springfield, USA\n\n-- \nYou received this message because you are subscribed to the Acme Groups \"Network Support\" group. To unsubscribe from this group and stop receiving emails from it, send an email to network+unsubscribe@acme.co.",
+      "category": "Network",
+      "priority": "high",
+      "requester_email": "john.doe@acme.co",
+      "created_at": "2024-10-28T18:37:15.783Z"
+    },
+    {
+      "ticket_id": "TKT-014",
+      "subject": "Access Issue with Internal Web Application - Browser Compatibility",
+      "description": "User unable to access a specific internal web application due to suspected browser compatibility issues. Detailed investigation and manual configuration of browser settings required. Potential application-side adjustments may also be necessary. Please advise on the best course of action to resolve this issue.",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "user123@acme.co",
+      "created_at": "2024-10-28T18:37:11.982Z"
+    },
+    {
+      "ticket_id": "TKT-015",
+      "subject": "Software License Activation Failures",
+      "description": "Hi there, I'm experiencing persistent software license activation failures on multiple devices. Could you please investigate this issue in detail? It seems like there might be some communication problems with the licensing server. I would appreciate your help in resolving this manually to ensure compliance with our licensing terms. Thanks!",
+      "category": "Licensing",
+      "priority": "high",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:37:10.453Z"
+    },
+    {
+      "ticket_id": "TKT-016",
+      "subject": "Slack Workspace Access Request",
+      "description": "Hi,\n\nCould you please grant me access to the Slack workspace for our team? I need it to collaborate on ongoing projects and communicate with team members.\n\nBest,\nAlex",
+      "category": "Communication",
+      "priority": "medium",
+      "requester_email": "alex@acme.co",
+      "created_at": "2024-10-28T18:37:12.426Z"
+    },
+    {
+      "ticket_id": "TKT-017",
+      "subject": "Google Calendar Setup Instructions",
+      "description": "Hi team, I'm trying to set up a personal Google Calendar to better manage my individual tasks, but I'm not sure where to start. Could you provide me with some step-by-step instructions or point me to a guide? Thanks a bunch! :)",
+      "category": "Training",
+      "priority": "low",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:10.381Z"
+    },
+    {
+      "ticket_id": "TKT-018",
+      "subject": "Updating Personal Profile on Intranet",
+      "description": "Hi Team, Can you please provide instructions on how to update my personal profile information on the company intranet? Please let me know if you need any other information. Best, Jamie Lee | HR Coordinator • New York, NY • they/them",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jamie.lee@acme.co",
+      "created_at": "2024-10-28T18:37:10.397Z"
+    },
+    {
+      "ticket_id": "TKT-019",
+      "subject": "Access Request for DBox Team Folder",
+      "description": "Hey IT team, We need access to the DBox Team Folder for our project collaboration. Please follow the instructions in the link below to grant access. Our team is ready to test the access permissions to ensure everything is set up correctly. https://acme.co/support/dbox-access-guide",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:13.185Z"
+    },
+    {
+      "ticket_id": "TKT-020",
+      "subject": "Intermittent Slow Internet Connection on Office Floor: Requires On-Site Network Assessment and Configuration Adjustment",
+      "description": "We've been experiencing intermittent slow internet connection on the office floor. An on-site network assessment and configuration adjustment is required to resolve this issue. Please coordinate with the network team to schedule a visit and perform the necessary adjustments. Ensure that all network devices are checked and optimized for performance. If additional equipment is needed, please submit a request to [Procurement](https://acme.co/procurement) for approval.",
+      "category": "Network",
+      "priority": "high",
+      "requester_email": "john.doe@acme.co",
+      "created_at": "2024-10-28T18:37:13.105Z"
+    },
+    {
+      "ticket_id": "TKT-021",
+      "subject": "Jane (jane.doe@acme.co) is requesting access to Adobe CC Suite",
+      "description": "Jane (jane.doe@acme.co) is requesting access to Adobe CC Suite\n\nJane (jane.doe@acme.co mailto:jane.doe@acme.co), a graphic designer on the Acme team, is requesting access to Adobe CC Suite to enhance her design capabilities and collaborate on creative projects. ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ ‌ \n\nhttps://adobe.acme.co/access-request\n\nJane (jane.doe@acme.co mailto:jane.doe@acme.co), a graphic designer on the Acme team, is requesting access to Adobe CC Suite to enhance her design capabilities and collaborate on creative projects.\n\nGrant Access https://adobe.acme.co/grant-access\n\nAcme Corporation\n\n123 Innovation Drive, Suite 100, Metropolis, NY 12345 USA https://adobe.acme.co/contact",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:31.599Z"
+    },
+    {
+      "ticket_id": "TKT-022",
+      "subject": "Wi-Fi Connection Issue on Device",
+      "description": "I'm unable to connect to the corporate Wi-Fi network. It seems to be a device-specific configuration issue. Could you look into this and help adjust the network settings and security protocols?",
+      "category": "Network",
+      "priority": "medium",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:37:24.743Z"
+    },
+    {
+      "ticket_id": "TKT-023",
+      "subject": "Access Request for JIRA Dashboard",
+      "description": "Hi there, I've just joined the Product team and need access to the JIRA Dashboard. Could you assist with this? Appreciate it!",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "new.employee@acme.co",
+      "created_at": "2024-10-28T18:37:24.650Z"
+    },
+    {
+      "ticket_id": "TKT-024",
+      "subject": "Request for Access to Marketing Shared Drive",
+      "description": "Attention Acme IT,The marketing team requires access to a shared network drive to enhance collaboration and streamline our workflow. Please review the request details below and grant the necessary permissions to ensure seamless access for all team members.Request: \"Access to Marketing Shared Drive\"Requested By: Marketing TeamEffective Date: 2024-10-01Date and Time Submitted: 2024-09-25T11:30:00.000-07:00 PST (Acme Server Time Zone)Team: MarketingEmail: marketing.team@acme.co---------------------------------------------------------------This email was generated from Acme's internal request system on behalf of the Marketing Department. Please DO NOT REPLY to this email.",
+      "category": "Network",
+      "priority": "medium",
+      "requester_email": "marketing.team@acme.co",
+      "created_at": "2024-10-28T18:37:26.090Z"
+    },
+    {
+      "ticket_id": "TKT-025",
+      "subject": "Fwd: Access Request for Photoshop & Illustrator Tools",
+      "description": "Hi IT - Wanted to make sure you were aware of this notice: ---------- Forwarded message --------- From: Adobe <hello@adobe.com> Date: Tue, Oct 10, 2023 at 10:15 AM Subject: Access Request for Photoshop & Illustrator Tools To: <jane.doe@acme.co> Get more details inside. Please forward this email to your IT department. This is a reminder that we’ll be granting access to Adobe Photoshop and Illustrator tools on October 12, 2023, at 9:00 a.m. (PT). Failure to take the necessary steps below may result in delays in accessing these tools: * This update only applies to users with active Adobe Creative Cloud subscriptions. * Users may encounter the message “Access Denied” when trying to open Photoshop or Illustrator after the access update. If this occurs, ensure your subscription is active and try logging out and back into your Adobe account. * If your Adobe account is managed by your organization, there is no action required on your part in updating access permissions. * If you’re leveraging Adobe Enterprise ID, you’ll need to verify your account details. * If your Adobe account is linked to a personal email, you may need to initiate a manual update from your account settings on October 12, 2023, after 9:00 a.m. (PT). Access it and a copy of our new access policy here (http://app.go.adobe.com/e/er?s=1426&lid=11225&elqTrackId=92d76358302b4038a5becde096401dea&elq=f03455acdbba420d8d6d707a20233c79&elqaid=18903&elqat=1) . If your IT department does not have access to the Adobe Admin Console, please forward them the instructions. * If your Adobe account is not linked to an organization or if you need further assistance to complete this change, contact Adobe Support directly to manually update your access by October 12, to ensure you’re able to continue using Photoshop and Illustrator. *If you're not logged into the Adobe Admin Console, you'll be asked to enter your credentials when accessing the link(s). Adobe 345 Park Avenue San Jose, CA 95110 (800) 833-6687 Want to change how you receive these emails? You can update your preferences (http://go.adobe.com/customersubscription?elqTrackId=82a702c7793c4a0091876a0ac12cbb1b&elq=f03455acdbba420d8d6d707a20233c79&elqaid=18903&elqat=1&elqCampaignId=69212&elqcst=272&elqcsid=2580) or unsubscribe from this list (http://go.adobe.com/customersubscription?elqTrackId=2f2add3195fe450bb8a282e01004a2d2&elq=f03455acdbba420d8d6d707a20233c79&elqaid=18903&elqat=1&elqCampaignId=69212&elqcst=272&elqcsid=2580) . -- Jane Doe | Creative Team Lead Acme Co (https://acme.co/) • New York, NY • she/her",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:37.114Z"
+    },
+    {
+      "ticket_id": "TKT-026",
+      "subject": "Access Request for SFDC Platform",
+      "description": "Hi IT Team, Hope you're all doing well. I've been informed that I should have access to the SFDC Platform for our upcoming sales initiatives, but it seems I don't have the necessary permissions. I've attached a screenshot of the error message I receive when trying to log in. Please advise on how to proceed. Many thanks, Alex",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "alex@acme.co",
+      "created_at": "2024-10-28T18:37:24.834Z"
+    },
+    {
+      "ticket_id": "TKT-027",
+      "subject": "Intermittent Data Loss in Cloud Application",
+      "description": "I am experiencing intermittent data loss in our cloud-based application, which seems to be due to synchronization issues. This requires a detailed investigation and manual reconciliation of data discrepancies across multiple user accounts and devices.",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:24.461Z"
+    },
+    {
+      "ticket_id": "TKT-028",
+      "subject": "Cloud Tool Access Issue",
+      "description": "Hi, I'm having trouble accessing the cloud-based collaboration tool, __AcmeCollab__. It seems like there might be an issue with my account provisioning. I should have access to the project management features, but they're currently unavailable. Could someone look into my account settings and permissions to resolve this? Thanks.",
+      "category": "Account",
+      "priority": "high",
+      "requester_email": "user123@acme.co",
+      "created_at": "2024-10-28T18:37:24.686Z"
+    },
+    {
+      "ticket_id": "TKT-029",
+      "subject": "Remote Desktop Access Instructions",
+      "description": "Hello,\n\nI hope this message finds you well! Could I please get instructions on how to access the remote desktop for the first time?\n\nThank you!\n\nJordan\n--\nJordan Smith | IT Support Specialist\nAcme Co (http://www.acme.co/)  ● New York, NY",
+      "category": "RemoteWork",
+      "priority": "medium",
+      "requester_email": "jordan.smith@acme.co",
+      "created_at": "2024-10-28T18:37:25.620Z"
+    },
+    {
+      "ticket_id": "TKT-030",
+      "subject": "Troubleshooting Slow Internet on Company Laptop",
+      "description": "Hello,\n\nWe are reaching out to assist you with the slow internet connection issue on your company-issued laptop. Please follow these troubleshooting steps: 1. Restart your laptop and router. 2. Check for any available updates for your operating system and install them. 3. Ensure no bandwidth-heavy applications are running in the background. 4. Try connecting to a different network to see if the issue persists. If the problem continues, please email support@acme.co for further assistance.\n\nThanks!\nAcme IT\n\n-- \nThis email was sent to you because an Acme IT administrator listed you as the recipient. If you believe this was sent in error, please contact your Acme IT administrator. If you are unsure who this is, please contact your Helpdesk or IT Team.",
+      "category": "Network",
+      "priority": "medium",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:37:26.777Z"
+    },
+    {
+      "ticket_id": "TKT-031",
+      "subject": "Access Request for SF Platform",
+      "description": "Hi, I need to request access to the SF Platform. Thanks, Alex Johnson",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "alex.johnson@acme.co",
+      "created_at": "2024-10-28T18:37:45.501Z"
+    },
+    {
+      "ticket_id": "TKT-032",
+      "subject": "Slow Internet Connection Troubleshooting",
+      "description": "User is experiencing slow internet connection on personal desktop computer. Internet speed is significantly reduced, affecting work efficiency. Requesting detailed troubleshooting steps to resolve the issue. Slow connection persists despite restarting the router and computer.",
+      "category": "Network",
+      "priority": "medium",
+      "requester_email": "user123@acme.co",
+      "created_at": "2024-10-28T18:37:45.809Z"
+    },
+    {
+      "ticket_id": "TKT-033",
+      "subject": "Request for Instructions on Reporting a Suspected Phishing Email",
+      "description": "I received a suspicious email in my company inbox that appears to be a phishing attempt. Could you please provide the steps to report this within our organization?",
+      "category": "Security",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:37:47.055Z"
+    },
+    {
+      "ticket_id": "TKT-034",
+      "subject": "Acme: Firewall Configuration Request: FW-WS-2023 Workstation Firewall Setup",
+      "description": "Firewall Configuration Request\n\nAccount  Acme\nRequest Id  FW-WS-2023\nRequest Title  Workstation Firewall Setup\nRequest Type  Configuration\nRequest Schedule  As soon as possible\nUser  john_doe@acme.co\n\nClick here  (https://support.acme.co/firewall-setup) for more information.\n\nThis email was automatically generated by Acme IT Support because a configuration request was submitted on your account.\n\nIf you have questions about this email communication, please contact the Acme IT Support at 1.800.123.4567 or support@acme.co .\n\nClick here  (https://support.acme.co/user-preferences) to update your user notification preferences.",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "john_doe@acme.co",
+      "created_at": "2024-10-28T18:37:47.989Z"
+    },
+    {
+      "ticket_id": "TKT-035",
+      "subject": "Assistance Required for Syncing Google Calendar with Scheduling System",
+      "description": "Hello! I am reaching out hoping to get some assistance with syncing a newly created Google Calendar with our company-wide scheduling system. The integration seems to be having issues, and it's crucial for our team to have this calendar in sync to avoid any scheduling conflicts. We have tried the usual troubleshooting steps, but the problem persists. Could you please look into this at your earliest convenience? Thank you for your help! -- Alex Johnson | Operations Coordinator Acme Co (https://acme.co/alex-johnson) • New York, NY",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "alex.johnson@acme.co",
+      "created_at": "2024-10-28T18:37:47.377Z"
+    },
+    {
+      "ticket_id": "TKT-036",
+      "subject": "Assistance Needed for Data Restoration",
+      "description": "Hey team, I accidentally deleted some critical project files and need help restoring them from our backup. These files are essential for our current project, and I need to recover them as soon as possible. Could you guide me through the process or handle the restoration? Thanks in advance!",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "alex.tharp@acme.co",
+      "created_at": "2024-10-28T18:37:46.283Z"
+    },
+    {
+      "ticket_id": "TKT-037",
+      "subject": "Virtual Backgrounds Not Loading in Video Conferencing Software",
+      "description": "I'm having persistent issues with my video conferencing software where the virtual backgrounds fail to load correctly. It seems to require a detailed investigation and manual adjustment of the software settings. Could you also check if there are any updates needed for my graphics drivers?",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "user123@acme.co",
+      "created_at": "2024-10-28T18:37:46.244Z"
+    },
+    {
+      "ticket_id": "TKT-038",
+      "subject": "Critical Software Update Installation Issue",
+      "description": "Hello IT Team! \n\nI'm having trouble installing a critical software update due to what seems to be a system registry corruption. Could someone look into this and manually repair the registry entries? It's crucial for the update to be installed to maintain system stability. \n\nThanks a lot!\n\nBest,\n\nJordan\n\n--\n\nJordan Smith  |  Senior Analyst\n\nAcme Co (https://acme.co/)   •  New York, NY\n\nCONFIDENTIALITY NOTICE: The contents of this email message and any attachments are intended solely for the addressee(s) and may contain confidential and/or privileged information and may be legally protected from disclosure. If you are not the intended recipient of this message or their agent, or if this message has been addressed to you in error, please immediately alert the sender by reply email and then delete this message and any attachments. If you are not the intended recipient, you are hereby notified that any use, dissemination, copying, or storage of this message or its attachments is strictly prohibited.\n\nDISCLAIMER: Email Does Not Constitute a Binding Agreement. This email does not constitute an agreement to conduct transactions by electronic means and does not create any legally binding contract or enforceable obligation in the absence of a fully signed written contract. Any contract terms contained in this email are subject to approval by Acme Co and are not binding until Acme Co provides such approval in writing.",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "jordan.smith@acme.co",
+      "created_at": "2024-10-28T18:37:54.983Z"
+    },
+    {
+      "ticket_id": "TKT-039",
+      "subject": "John Doe - Remote Desktop Connection Issues",
+      "description": "Attention Acme IT,\\n\\nPersistent issues have been detected with the remote desktop connection, causing intermittent drops that require detailed investigation. Please review the information below and determine if any manual configuration of network settings and firewall rules is necessary on both client and server machines to resolve the issue.\\n\\nTransaction: \"Connection Drop: John Doe\"\\nWorkday ID: 1234567890abcdef1234567890abcdef\\nEffective Date: 2024-11-01\\nDate and Time Reported: 2024-10-30T10:15:00.000-07:00 PST (Acme Server Time Zone)\\n\\nWorker: John Doe\\nWorker Type: EE\\nEmail: john.doe@acme.co\\n\\n---------------------------------------------------------------\\nThis email was generated from Acme IT Support on behalf of Acme HR.\\nPlease DO NOT REPLY to this email.",
+      "category": "Network",
+      "priority": "high",
+      "requester_email": "john.doe@acme.co",
+      "created_at": "2024-10-28T18:37:48.562Z"
+    },
+    {
+      "ticket_id": "TKT-040",
+      "subject": "Access Issue with Internal Database",
+      "description": "Hey team! I'm having trouble accessing a specific internal database and I suspect it might be due to a complex role-based access control misconfiguration. It seems like my user roles and permissions might need a detailed investigation and manual adjustment. Could you please look into this? Thank you! -- Thanks, Alex Johnson | Data Analyst, Business Intelligence",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "alex.johnson@acme.co",
+      "created_at": "2024-10-28T18:37:46.237Z"
+    },
+    {
+      "ticket_id": "TKT-041",
+      "subject": "Multi-Factor Authentication Setup",
+      "description": "Could you please provide instructions on setting up multi-factor authentication for my company email account?",
+      "category": "Account",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:38:03.180Z"
+    },
+    {
+      "ticket_id": "TKT-042",
+      "subject": "Request Access to Slack Channels",
+      "description": "Hello, Would you please grant me access to the company chat channels on Slack? Thank you!",
+      "category": "Communication",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:38:03.230Z"
+    },
+    {
+      "ticket_id": "TKT-043",
+      "subject": "Access Request for Illustrator & InDesign Tools",
+      "description": "Hi IT! I need access to Adobe Illustrator and InDesign for a project I'm working on. I've checked the software portal, but couldn't find these tools listed for installation. Could you guide me on how to get access to these applications? If there's a specific process or form I need to fill out, please let me know. I've attached a screenshot of the software portal for your reference. Looking forward to your assistance! Thanks!",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:38:04.916Z"
+    },
+    {
+      "ticket_id": "TKT-044",
+      "subject": "Instructions for Configuring Company Email on New Mobile Device",
+      "description": "Hello! I need instructions on how to configure my company email on a new mobile device. Please provide the necessary steps or any required settings.",
+      "category": "Communication",
+      "priority": "medium",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:38:03.625Z"
+    },
+    {
+      "ticket_id": "TKT-045",
+      "subject": "Zoom Meeting Host Access Request",
+      "description": "I need host access for an upcoming Zoom meeting scheduled for next week. Please grant the necessary permissions to my account.",
+      "category": "Communication",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:38:03.247Z"
+    },
+    {
+      "ticket_id": "TKT-046",
+      "subject": "Automated Backup Software Failing to Complete Scheduled Backups",
+      "description": "Hi there. I've been having persistent issues with our automated backup software. It seems that the scheduled backups are failing to complete. I believe it might require a detailed investigation and possibly some manual configuration of the backup settings. Additionally, there might be a need to adjust storage allocation and permissions. Can someone assist with this? Thanks! -- Alex Johnson | IT Specialist Acme Co (http://www.acme.co) - New York, NY 212.555.0199",
+      "category": "Software",
+      "priority": "high",
+      "requester_email": "alex.johnson@acme.co",
+      "created_at": "2024-10-28T18:38:04.469Z"
+    },
+    {
+      "ticket_id": "TKT-047",
+      "subject": "Access to Virtual Machine Instances",
+      "description": "Hello, I'm unable to access specific virtual machine instances in our cloud environment. It seems there might be some complex misconfigurations with the network security groups. Could you please investigate and manually adjust the firewall rules and access controls? I need this resolved to continue my work. Best regards, Jamie Doe",
+      "category": "Network",
+      "priority": "high",
+      "requester_email": "jamie.doe@acme.co",
+      "created_at": "2024-10-28T18:38:04.045Z"
+    },
+    {
+      "ticket_id": "TKT-048",
+      "subject": "Digital Certificate Authentication Issue",
+      "description": "Hi, I'm experiencing persistent issues with digital certificate authentication for secure email communication. It seems to require a detailed investigation and possibly a manual reconfiguration of the certificate settings. There might also be a need for reissuance of certificates. Could you please look into this? Thanks,",
+      "category": "Security",
+      "priority": "high",
+      "requester_email": "user@acme.co",
+      "created_at": "2024-10-28T18:38:04.675Z"
+    },
+    {
+      "ticket_id": "TKT-049",
+      "subject": "Automated Data Backups Setup",
+      "description": "I need instructions on setting up automated data backups using the company-approved software.",
+      "category": "Software",
+      "priority": "medium",
+      "requester_email": "jane.doe@acme.co",
+      "created_at": "2024-10-28T18:38:03.196Z"
+    },
+    {
+      "ticket_id": "TKT-050",
+      "subject": "Instructions for Configuring Multiple Monitors",
+      "description": "Hi! I need some guidance on how to attach and configure multiple monitors to my workstation. Could someone assist me with this? Thanks!",
+      "category": "Hardware",
+      "priority": "medium",
+      "requester_email": "abigail.giannou@acme.co",
+      "created_at": "2024-10-28T18:38:04.482Z"
+    }
+  ]
+}
