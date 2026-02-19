@@ -36,7 +36,6 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
   const [rawActiveZone, setRawActiveZone] = useState<string | null>(null);
   const [rawIsLocked, setRawIsLocked] = useState(false);
 
-  // Reset on page navigation
   const pathname = usePathname();
   const [prevPathname, setPrevPathname] = useState(pathname);
   if (pathname !== prevPathname) {
@@ -45,7 +44,6 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
     setRawIsLocked(false);
   }
 
-  // Clamp activeZone to valid zones
   const zones = rawZones;
   const activeZone =
     rawActiveZone !== null && zones.includes(rawActiveZone)
@@ -67,7 +65,6 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
       if (isInputFocused()) return;
 
       if (isLocked) {
-        // When locked, only handle Escape to unlock
         if (e.key === "Escape") {
           e.preventDefault();
           setRawIsLocked(false);
@@ -75,9 +72,6 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Not locked below this point
-
-      // Escape clears zone selection entirely
       if (e.key === "Escape" && activeZone !== null) {
         e.preventDefault();
         setRawActiveZone(null);
@@ -87,7 +81,6 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
       if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
         e.preventDefault();
         if (activeZone === null) {
-          // First activation: start at second zone (content area) or first
           setRawActiveZone(zones.length > 1 ? zones[1] : zones[0] ?? null);
         } else {
           const currentIdx = zones.indexOf(activeZone);
@@ -106,15 +99,11 @@ export function ZoneNavProvider({ children }: { children: ReactNode }) {
         return;
       }
 
-      // Auto-lock on Up/Down when a zone is active — this prevents
-      // accidental Left/Right zone switches while navigating items.
-      // Individual hooks (useKeyboardNav) handle the actual Up/Down navigation.
       if (
         (e.key === "ArrowUp" || e.key === "ArrowDown") &&
         activeZone !== null
       ) {
         setRawIsLocked(true);
-        // Don't preventDefault — let individual hooks handle the arrow key
       }
     }
 

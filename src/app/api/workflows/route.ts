@@ -3,6 +3,8 @@ import { v4 as uuidv4 } from "uuid";
 import type { WorkflowDefinition } from "@/lib/engine/types";
 import { getWorkflowStore } from "@/lib/persistence/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const workflows = getWorkflowStore().getAll();
   return NextResponse.json({ workflows });

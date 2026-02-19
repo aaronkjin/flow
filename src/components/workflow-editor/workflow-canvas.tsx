@@ -22,6 +22,8 @@ import JudgeNode from "./nodes/judge-node";
 import HITLNode from "./nodes/hitl-node";
 import ConnectorNode from "./nodes/connector-node";
 import ConditionNode from "./nodes/condition-node";
+import AgentNode from "./nodes/agent-node";
+import SubWorkflowNode from "./nodes/sub-workflow-node";
 import WorkflowEdge from "./edges/workflow-edge";
 
 const nodeTypes: NodeTypes = {
@@ -31,6 +33,8 @@ const nodeTypes: NodeTypes = {
   hitl: HITLNode,
   connector: ConnectorNode,
   condition: ConditionNode,
+  agent: AgentNode,
+  "sub-workflow": SubWorkflowNode,
 };
 
 const edgeTypes: EdgeTypes = {
@@ -49,34 +53,61 @@ export default function WorkflowCanvas({ workflow, focusedNodeId }: WorkflowCanv
 
   const snapGrid = useMemo<[number, number]>(() => [16, 16], []);
 
+  const isPreview = !!workflow.previewNodes;
+
   const displayNodes = useMemo(() => {
+    if (workflow.previewNodes) {
+      return workflow.previewNodes.map((node) => ({
+        ...node,
+        draggable: false,
+        selectable: false,
+        deletable: false,
+        className: "opacity-40 !transition-opacity",
+      }));
+    }
     if (!focusedNodeId) return workflow.nodes;
     return workflow.nodes.map((node) =>
       node.id === focusedNodeId
         ? { ...node, className: "ring-2 ring-orange-500/60 rounded-lg" }
         : node
     );
-  }, [workflow.nodes, focusedNodeId]);
+  }, [workflow.nodes, workflow.previewNodes, focusedNodeId]);
+
+  const displayEdges = useMemo(() => {
+    if (workflow.previewEdges) {
+      return workflow.previewEdges.map((edge) => ({
+        ...edge,
+        deletable: false,
+        selectable: false,
+        focusable: false,
+        style: { opacity: 0.35, strokeWidth: 1, stroke: "#d6d3cd" },
+      }));
+    }
+    return workflow.edges;
+  }, [workflow.edges, workflow.previewEdges]);
 
   return (
     <div className="h-full w-full">
       <ReactFlow
         nodes={displayNodes}
-        edges={workflow.edges}
-        onNodesChange={workflow.onNodesChange}
-        onEdgesChange={workflow.onEdgesChange}
-        onConnect={workflow.onConnect}
-        onNodeClick={(_: React.MouseEvent, node: Node) => workflow.selectNode(node.id)}
-        onPaneClick={() => workflow.selectNode(null)}
-        onDragOver={onDragOver}
-        onDrop={onDrop}
+        edges={displayEdges}
+        onNodesChange={isPreview ? undefined : workflow.onNodesChange}
+        onEdgesChange={isPreview ? undefined : workflow.onEdgesChange}
+        onConnect={isPreview ? undefined : workflow.onConnect}
+        onNodeClick={isPreview ? undefined : (_: React.MouseEvent, node: Node) => workflow.selectNode(node.id)}
+        onPaneClick={isPreview ? undefined : () => workflow.selectNode(null)}
+        onDragOver={isPreview ? undefined : onDragOver}
+        onDrop={isPreview ? undefined : onDrop}
         nodeTypes={nodeTypes}
         edgeTypes={edgeTypes}
         defaultEdgeOptions={defaultEdgeOptions}
+        nodesDraggable={!isPreview}
+        nodesConnectable={!isPreview}
+        elementsSelectable={!isPreview}
         snapToGrid
         snapGrid={snapGrid}
         fitView
-        deleteKeyCode={["Delete", "Backspace"]}
+        deleteKeyCode={isPreview ? [] : ["Delete", "Backspace"]}
         proOptions={{ hideAttribution: true }}
       >
         <Controls showInteractive={false} />

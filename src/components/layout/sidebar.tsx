@@ -126,8 +126,8 @@ export function Sidebar() {
           const { reviews } = (await res.json()) as { reviews: unknown[] };
           if (active) setReviewCount(reviews?.length ?? 0);
         }
-      } catch {
-        // ignore fetch errors
+      } catch (err) {
+        void err;
       }
     }
 
@@ -147,7 +147,6 @@ export function Sidebar() {
 
   return (
     <>
-      {/* Mobile hamburger */}
       <div className="md:hidden fixed top-0 left-0 z-40 p-2">
         <Sheet>
           <SheetTrigger asChild>
@@ -162,7 +161,6 @@ export function Sidebar() {
         </Sheet>
       </div>
 
-      {/* Desktop sidebar */}
       <aside
         className={`hidden md:flex md:flex-col h-screen border-r bg-background shrink-0 transition-[width] duration-200 ease-in-out relative ${
           collapsed ? "w-12" : "w-60"

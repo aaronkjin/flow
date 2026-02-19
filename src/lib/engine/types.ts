@@ -1,8 +1,4 @@
-// ============================================================
-// Action — Central Type Definitions
-// ============================================================
-
-// --- Workflow Definition (persisted) ---
+import type { TokenUsageSummary } from "./token-tracking";
 
 export interface WorkflowDefinition {
   id: string;
@@ -10,9 +6,10 @@ export interface WorkflowDefinition {
   description: string;
   steps: StepDefinition[];
   edges: EdgeDefinition[];
-  canvasState?: CanvasState; // React Flow positions for reopening editor
+  canvasState?: CanvasState;
   createdAt: string;
   updatedAt: string;
+  blockConfig?: WorkflowBlockConfig;
 }
 
 export interface StepDefinition {
@@ -20,7 +17,7 @@ export interface StepDefinition {
   type: StepType;
   name: string;
   config: StepConfig;
-  position?: { x: number; y: number }; // Canvas position
+  position?: { x: number; y: number };
 }
 
 export type StepType =
@@ -29,7 +26,9 @@ export type StepType =
   | "judge"
   | "hitl"
   | "connector"
-  | "condition";
+  | "condition"
+  | "agent"
+  | "sub-workflow";
 
 export type StepConfig =
   | TriggerStepConfig
@@ -37,13 +36,15 @@ export type StepConfig =
   | JudgeStepConfig
   | HITLStepConfig
   | ConnectorStepConfig
-  | ConditionStepConfig;
+  | ConditionStepConfig
+  | AgentStepConfig
+  | SubWorkflowStepConfig;
 
 export interface EdgeDefinition {
   id: string;
-  source: string; // step ID
-  target: string; // step ID
-  sourceHandle?: string; // e.g. "pass", "flag", "yes", "no", "approve", "reject"
+  source: string;
+  target: string;
+  sourceHandle?: string;
   targetHandle?: string;
   label?: string;
 }
@@ -57,8 +58,6 @@ export interface CanvasState {
   }>;
 }
 
-// --- Step Configs ---
-
 export interface TriggerStepConfig {
   type: "trigger";
   triggerType: "dataset" | "manual" | "webhook";
@@ -68,7 +67,7 @@ export interface TriggerStepConfig {
 
 export interface LLMStepConfig {
   type: "llm";
-  model: string; // e.g. "gpt-4o-mini"
+  model: string;
   systemPrompt: string;
   userPrompt: string;
   temperature: number;
@@ -77,32 +76,32 @@ export interface LLMStepConfig {
 
 export interface JudgeStepConfig {
   type: "judge";
-  inputStepId: string; // which step's output to judge
+  inputStepId: string;
   criteria: JudgeCriterion[];
-  threshold: number; // 0-1, auto-pass confidence level
+  threshold: number;
   model: string;
 }
 
 export interface JudgeCriterion {
   name: string;
   description: string;
-  weight: number; // 0-1
+  weight: number;
 }
 
 export interface HITLStepConfig {
   type: "hitl";
   instructions: string;
-  showSteps: string[]; // step IDs whose outputs to show reviewer
+  showSteps: string[];
   autoApproveOnJudgePass: boolean;
-  judgeStepId?: string; // judge step that unlocks auto-approve
-  reviewTargetStepId?: string; // step whose output should be edited by reviewer
+  judgeStepId?: string;
+  reviewTargetStepId?: string;
 }
 
 export interface ConnectorStepConfig {
   type: "connector";
   connectorType: ConnectorType;
   action: string;
-  params: Record<string, unknown>; // interpolation-ready
+  params: Record<string, unknown>;
 }
 
 export type ConnectorType =
@@ -114,12 +113,66 @@ export type ConnectorType =
 
 export interface ConditionStepConfig {
   type: "condition";
-  expression: string; // e.g. "{{steps.judge.recommendation}} === 'pass'"
+  expression: string;
   yesLabel?: string;
   noLabel?: string;
 }
 
-// --- Run State (persisted) ---
+export interface AgentStepConfig {
+  type: "agent";
+  model: string;
+  systemPrompt: string;
+  taskPrompt: string;
+  tools: AgentToolRef[];
+  maxIterations: number;
+  temperature: number;
+  hitlOnLowConfidence: boolean;
+  confidenceThreshold: number;
+  outputSchema?: Record<string, unknown>;
+}
+
+export interface AgentToolRef {
+  type: "connector" | "sub_workflow" | "custom_function";
+  connectorType?: ConnectorType;
+  action?: string;
+  workflowId?: string;
+  functionName?: string;
+  functionDescription?: string;
+  functionParameters?: Record<string, unknown>;
+}
+
+export interface AgentIteration {
+  index: number;
+  reasoning: string;
+  toolCall?: { toolName: string; arguments: Record<string, unknown> };
+  toolResult?: { success: boolean; output: Record<string, unknown>; error?: string };
+  isComplete: boolean;
+  confidence?: number;
+  tokensUsed: { prompt: number; completion: number };
+}
+
+export interface SubWorkflowStepConfig {
+  type: "sub-workflow";
+  workflowId: string;
+  inputMapping: Record<string, string>;
+}
+
+export interface WorkflowBlockConfig {
+  blockName: string;
+  blockDescription: string;
+  blockIcon?: string;
+  inputSchema: WorkflowBlockField[];
+  outputStepId: string;
+  outputFields?: string[];
+}
+
+export interface WorkflowBlockField {
+  name: string;
+  type: "string" | "number" | "text" | "boolean" | "json";
+  description?: string;
+  required: boolean;
+  defaultValue?: unknown;
+}
 
 export type RunStatus =
   | "pending"
@@ -134,12 +187,15 @@ export interface Run {
   workflowName: string;
   status: RunStatus;
   input: Record<string, unknown>;
-  stepStates: Record<string, StepState>; // keyed by step ID
+  stepStates: Record<string, StepState>;
   currentStepId: string | null;
   error?: string;
   createdAt: string;
   updatedAt: string;
   completedAt?: string;
+  parentRunId?: string;
+  parentStepId?: string;
+  tokenUsage?: TokenUsageSummary;
 }
 
 export type StepStatus =
@@ -160,26 +216,20 @@ export interface StepState {
   completedAt?: string;
 }
 
-// --- Judge Result ---
-
 export interface JudgeResult {
-  criteriaScores: Record<string, number>; // criterion name → score 0-1
-  overallConfidence: number; // 0-1
+  criteriaScores: Record<string, number>;
+  overallConfidence: number;
   issues: string[];
   recommendation: "pass" | "flag" | "fail";
   reasoning: string;
 }
 
-// --- HITL Decision ---
-
 export interface HITLDecision {
   action: "approve" | "edit" | "reject";
   editedOutput?: Record<string, unknown>;
   comment?: string;
-  targetStepId?: string; // optional explicit step to overwrite when edited
+  targetStepId?: string;
 }
-
-// --- Trace ---
 
 export type TraceEventType =
   | "run_started"
@@ -192,7 +242,12 @@ export type TraceEventType =
   | "hitl_resumed"
   | "connector_fired"
   | "run_completed"
-  | "run_failed";
+  | "run_failed"
+  | "agent_iteration"
+  | "agent_tool_call"
+  | "agent_complete"
+  | "sub_workflow_started"
+  | "sub_workflow_completed";
 
 export interface TraceEvent {
   id: string;
@@ -203,8 +258,6 @@ export interface TraceEvent {
   data: Record<string, unknown>;
   timestamp: string;
 }
-
-// --- Connector ---
 
 export interface ConnectorResult {
   success: boolean;
@@ -220,8 +273,6 @@ export interface Connector {
   ): Promise<ConnectorResult>;
 }
 
-// --- Dataset ---
-
 export interface DatasetConfig {
   id: string;
   name: string;
@@ -231,14 +282,10 @@ export interface DatasetConfig {
   itemCount: number;
 }
 
-// --- Interpolation ---
-
 export interface InterpolationContext {
   input: Record<string, unknown>;
   steps: Record<string, Record<string, unknown>>;
 }
-
-// --- Review (enriched view for frontend) ---
 
 export interface ReviewItem {
   run: Run;

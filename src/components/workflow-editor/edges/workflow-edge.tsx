@@ -39,7 +39,6 @@ export default function WorkflowEdge({
 
   return (
     <>
-      {/* Invisible wider path for easier hover targeting */}
       <path
         d={edgePath}
         fill="none"

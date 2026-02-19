@@ -42,15 +42,12 @@ export function useCanvasNav({
   const [rawFocusedNodeId, setFocusedNodeId] = useState<string | null>(null);
   const [wasEnabled, setWasEnabled] = useState(false);
 
-  // Derive focusedNodeId: auto-focus top-left node on enable transition
   let focusedNodeId = rawFocusedNodeId;
   if (enabled && !wasEnabled) {
-    // Transition from disabled -> enabled: pick top-left node
     focusedNodeId = getTopLeftNodeId(nodes);
     setFocusedNodeId(focusedNodeId);
     setWasEnabled(true);
   } else if (!enabled && wasEnabled) {
-    // Transition from enabled -> disabled: clear focus
     focusedNodeId = null;
     setFocusedNodeId(null);
     setWasEnabled(false);
@@ -108,7 +105,6 @@ export function useCanvasNav({
       if (candidates.length === 0) return;
 
       e.preventDefault();
-      // Pick closest by Euclidean distance
       let closest = candidates[0];
       let closestDist = Infinity;
       for (const c of candidates) {

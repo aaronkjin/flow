@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getWorkflowStore } from "@/lib/persistence/store";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ workflowId: string }> }
@@ -34,7 +36,7 @@ export async function PUT(
   }
 
   const body = await request.json();
-  const { name, description, steps, edges, canvasState } = body;
+  const { name, description, steps, edges, canvasState, blockConfig } = body;
 
   const workflow = {
     ...existing,
@@ -43,6 +45,7 @@ export async function PUT(
     ...(steps !== undefined && { steps }),
     ...(edges !== undefined && { edges }),
     ...(canvasState !== undefined && { canvasState }),
+    ...(blockConfig !== undefined && { blockConfig }),
     updatedAt: new Date().toISOString(),
   };
 

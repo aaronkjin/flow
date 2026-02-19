@@ -78,7 +78,6 @@ export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps)
         </div>
       </CardHeader>
       <CardContent className="px-6 pb-6 space-y-5">
-        {/* Overall Confidence */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between text-sm">
             <span className="text-muted-foreground">Overall Confidence</span>
@@ -96,7 +95,6 @@ export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps)
           </div>
         </div>
 
-        {/* Criteria Scores */}
         {sortedCriteria.length > 0 && (
           <div className="space-y-3">
             <h4 className="text-sm font-medium">Criteria Scores</h4>
@@ -119,7 +117,6 @@ export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps)
           </div>
         )}
 
-        {/* Issues */}
         {assessment.issues.length > 0 && (
           <div className="rounded-lg border-l-2 border-amber-300 bg-amber-50/50 dark:bg-amber-950/20 px-4 py-3 space-y-1">
             <h4 className="text-sm font-medium">Issues</h4>
@@ -131,7 +128,6 @@ export function JudgeAssessment({ assessment, cardProps }: JudgeAssessmentProps)
           </div>
         )}
 
-        {/* Reasoning */}
         <Collapsible open={reasoningOpen} onOpenChange={setReasoningOpen}>
           <CollapsibleTrigger className="flex items-center gap-1 text-sm font-medium hover:underline cursor-pointer">
             {reasoningOpen ? (

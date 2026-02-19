@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getDataset } from "@/lib/datasets/loader";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ datasetId: string }> }

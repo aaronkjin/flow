@@ -8,6 +8,8 @@ import type {
 } from "@/lib/engine/types";
 import { getWorkflowStore, getRunStore } from "@/lib/persistence/store";
 
+export const dynamic = "force-dynamic";
+
 function buildReviewItem(run: Run): ReviewItem | null {
   const workflow = getWorkflowStore().get(run.workflowId);
   if (!workflow) return null;
@@ -29,7 +31,6 @@ function buildReviewItem(run: Run): ReviewItem | null {
       priorStepOutputs[stepId] =
         stepState.output as Record<string, unknown>;
 
-      // Check if this is a judge step
       const stepDef = workflow.steps.find(
         (s: StepDefinition) => s.id === stepId
       );
@@ -60,7 +61,6 @@ export async function GET() {
     if (item) reviews.push(item);
   }
 
-  // Sort by createdAt ascending (oldest first = highest priority)
   reviews.sort(
     (a, b) =>
       new Date(a.run.createdAt).getTime() -

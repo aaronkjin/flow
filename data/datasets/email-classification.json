@@ -1,0 +1,454 @@
+{
+  "config": {
+    "id": "email-classification",
+    "name": "Multiclass Email Classification Dataset",
+    "description": "Multi-label email samples from imnim/multiclass-email-classification on HuggingFace",
+    "source": "huggingface:imnim/multiclass-email-classification",
+    "fields": [
+      "email_id",
+      "subject",
+      "body",
+      "labels"
+    ],
+    "itemCount": 50
+  },
+  "items": [
+    {
+      "email_id": "EML-001",
+      "subject": "Meeting Reminder: Quarterly Sales Review Tomorrow",
+      "body": "Dear Team, Just a friendly reminder that our Quarterly Sales Review meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please make sure to bring your sales reports and any relevant updates. Coffee and pastries will be provided. Looking forward to a productive meeting. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-002",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear Team, This is just a friendly reminder that our weekly team meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please make sure to come prepared with updates on your current projects. If you have any topics you'd like to discuss, feel free to email them to me before the meeting. Looking forward to a productive session. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-003",
+      "subject": "Important Update: New Company Policies",
+      "body": "Dear Team, I hope this email finds you well. I am writing to inform you about the recent updates in our company policies. These changes are aimed at enhancing efficiency and improving our operations. Please review the attached document for detailed information. Your cooperation in implementing these policies is greatly appreciated. If you have any questions or need clarification, feel free to reach out to me. Thank you for your attention to this matter. Best regards, [Your Name]",
+      "labels": [
+        "Business"
+      ]
+    },
+    {
+      "email_id": "EML-004",
+      "subject": "Important Update: Project Deadline Extension",
+      "body": "Dear Team, I hope this message finds you well. I wanted to inform you that due to unforeseen circumstances, the deadline for Project Alpha has been extended by one week. This decision was made to ensure that we deliver a high-quality output. Please adjust your timelines accordingly and reach out if you have any concerns or need further clarification. Thank you for your understanding and continued hard work. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-005",
+      "subject": "Monthly Finance Report",
+      "body": "Dear Team, Please find attached the monthly finance report for review. Kindly go through the report and let me know if you have any questions or need further clarification. Your prompt attention to this matter is greatly appreciated. Thank you. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Finance & Bills"
+      ]
+    },
+    {
+      "email_id": "EML-006",
+      "subject": "Reminder: Upcoming Team Meeting",
+      "body": "Dear Team, Just a friendly reminder that our monthly team meeting is scheduled for this Friday at 10:00 AM. We will be discussing the progress on our current projects and upcoming deadlines. Please make sure to come prepared with any updates or questions you may have. Looking forward to a productive meeting. See you all there! Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-007",
+      "subject": "Upcoming Webinar Invitation: Mastering Digital Marketing Strategies",
+      "body": "Dear valued customer, We are excited to invite you to our upcoming webinar on 'Mastering Digital Marketing Strategies'. Join us on Wednesday, July 21st, at 2:00 PM (EST) for an insightful session led by industry experts. Learn about the latest trends and best practices to enhance your digital marketing efforts. Register now to secure your spot and gain valuable knowledge to boost your online presence. We look forward to your participation! Warm regards, Marketing Team",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-008",
+      "subject": "Invitation to our Annual Company Picnic!",
+      "body": "Dear Team, We are excited to invite you to our annual company picnic this Saturday at Central Park. It will be a fun-filled day with games, food, and team building activities. Please RSVP by Thursday so we can make appropriate arrangements. We look forward to seeing you all there! Best regards, The HR Team",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-009",
+      "subject": "Confirmation of Your Flight Booking",
+      "body": "Dear Customer, We are pleased to confirm your flight booking for your upcoming trip from New York to London. Your flight details are as follows: Flight number: AB123, Departure: 10:00 AM, Arrival: 3:00 PM. Please ensure that you arrive at the airport at least 2 hours before departure. Safe travels! Best regards, Travel Airways",
+      "labels": [
+        "Travel & Bookings"
+      ]
+    },
+    {
+      "email_id": "EML-010",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear Team, I would like to confirm that our meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please make sure to review the agenda beforehand. If you have any questions or need to reschedule, please let me know. Looking forward to our discussion. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-011",
+      "subject": "Invitation to our Annual Charity Gala",
+      "body": "Dear valued supporters, We are delighted to invite you to our annual charity gala event on Saturday, December 12th, at the Grand Ballroom. Join us for an evening of dinner, live music, and a silent auction to support our cause. Your attendance and contributions will help make a positive impact on the community. Please RSVP by November 30th to secure your seat. We look forward to seeing you there!",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-012",
+      "subject": "Important Update: Upcoming Team Meeting",
+      "body": "Dear Team, I hope this email finds you well. I wanted to inform you about the upcoming team meeting scheduled for next Monday at 10:00 AM. We will be discussing the project timelines and key deliverables. Please come prepared with your progress updates and any blockers you may have encountered. Your active participation is crucial for the success of our project. Looking forward to productive discussions. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-013",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear Team, This is a gentle reminder that our quarterly meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please make sure to review the agenda beforehand. Your punctuality and active participation are highly appreciated. Looking forward to fruitful discussions. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-014",
+      "subject": "Monthly Financial Report",
+      "body": "Dear Team, I hope this email finds you well. Attached is the monthly financial report for review. Please take a moment to go through the document and let me know if you have any questions or need further clarification. Your prompt attention to this matter is greatly appreciated. Thank you. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Finance & Bills"
+      ]
+    },
+    {
+      "email_id": "EML-015",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear Team, Just a quick reminder that our monthly project review meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please make sure to come prepared with your updates and any relevant materials. Looking forward to a productive discussion. See you all there! Best regards, Sarah",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-016",
+      "subject": "Upcoming Team Building Event",
+      "body": "Dear Team, I hope this email finds you well. We are excited to announce our upcoming team building event scheduled for next Friday at the local park. The event will include various team-building activities and a BBQ lunch. Please RSVP by the end of this week so we can make necessary arrangements. We look forward to a fun and engaging day together. Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-017",
+      "subject": "Meeting Rescheduled",
+      "body": "Dear Team, Due to unforeseen circumstances, the meeting scheduled for tomorrow has been rescheduled to next week. Please check your calendars and confirm your availability for the new date. We apologize for any inconvenience this may cause. Thank you for your understanding. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-018",
+      "subject": "Meeting Agenda for Tomorrow's Presentation",
+      "body": "Dear Team, Please find attached the agenda for tomorrow's presentation meeting. We will be discussing the project timeline, deliverables, and key milestones. Your active participation and valuable input are essential for the success of this project. Looking forward to a productive meeting. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-019",
+      "subject": "Important Update: Meeting Rescheduled",
+      "body": "Dear Team, I hope this email finds you well. Due to unforeseen circumstances, the weekly team meeting scheduled for tomorrow has been rescheduled to Friday at 10:00 AM. We apologize for any inconvenience this may cause and appreciate your understanding. Please mark your calendars accordingly. Thank you for your cooperation. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-020",
+      "subject": "Upcoming Business Conference: Save the Date!",
+      "body": "Dear colleagues, I am excited to announce our upcoming business conference scheduled for next month. This conference will be a great opportunity for networking, learning about industry trends, and sharing ideas. Please mark your calendars and stay tuned for more details on the agenda, speakers, and registration process. We look forward to your participation and making this event a success. Save the date and get ready for an insightful experience!",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-021",
+      "subject": "Upcoming Company Event: Save the Date!",
+      "body": "Dear Team, We are excited to announce our upcoming company event! Mark your calendars for Friday, October 15th, from 6:00 PM to 9:00 PM at the Grand Ballroom. Join us for an evening of celebration, team building activities, and delicious food. Formal invitations will follow soon. We look forward to seeing you there! Best regards, The Events Committee",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-022",
+      "subject": "Upcoming Webinar on Digital Marketing Strategies",
+      "body": "Dear valued customers, We are excited to announce our upcoming webinar on 'Effective Digital Marketing Strategies in 2022.' Join us on Thursday, March 10th at 2:00 PM EST as industry experts share insights on the latest trends and best practices. Don't miss this opportunity to enhance your marketing skills and stay ahead of the competition. Register now to secure your spot! We look forward to seeing you there.",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-023",
+      "subject": "Reminder: Upcoming Team Meeting Tomorrow",
+      "body": "Dear Team, Just a friendly reminder that we have our monthly team meeting scheduled for tomorrow at 10:00 AM. The meeting will be held in the conference room on the 5th floor. Please make sure to review the agenda beforehand and come prepared to discuss your updates and any challenges you are facing. If you have any specific topics you'd like to add to the agenda, please let me know by the end of the day. Looking forward to productive discussions tomorrow! Best regards, [Your Name]",
+      "labels": [
+        "Reminders",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-024",
+      "subject": "Upcoming Company Event: Save the Date!",
+      "body": "Dear Team, We are excited to announce that our annual company-wide event will be held on Friday, December 10th. Join us for a fun-filled day of team-building activities, delicious food, and exciting prizes. More details and the official invitation will be sent out soon. Please mark your calendars and save the date! We look forward to celebrating together as a team. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-025",
+      "subject": "Upcoming Event: Annual Company Conference",
+      "body": "Dear Team, We are excited to announce the date for our annual company conference! Mark your calendars for Friday, October 15th, 2021. This year's event will be held at the Grand Hotel and will feature keynote speakers, breakout sessions, and team-building activities. Stay tuned for more details and the official agenda. Save the date and get ready for a day of inspiration, learning, and networking. We look forward to seeing you there! Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-026",
+      "subject": "Important Update: Company Meeting Rescheduled",
+      "body": "Dear Team, I hope this email finds you well. I wanted to inform you that the company meeting scheduled for this Friday has been rescheduled to next Monday at 10:00 AM in the conference room. Please make sure to update your calendars accordingly. We apologize for any inconvenience this may cause. If you have any questions or concerns, feel free to reach out to me. Thank you for your understanding. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-027",
+      "subject": "Upcoming Team Building Event at Company XYZ",
+      "body": "Dear Team, We are excited to announce that we will be organizing a team building event at Company XYZ next month. This event will include various team building activities and opportunities for team bonding. Please mark your calendars and stay tuned for more details in the coming weeks. We are looking forward to a fun and productive day together! Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations",
+        "Business"
+      ]
+    },
+    {
+      "email_id": "EML-028",
+      "subject": "Upcoming Team Meeting - Please Confirm Attendance",
+      "body": "Dear Team, I hope this email finds you well. I would like to remind you about our upcoming team meeting scheduled for next Monday at 10:00 AM in the conference room. It is important that everyone attends to discuss the new project timeline and share updates. Please confirm your attendance by replying to this email. Thank you and looking forward to seeing you all there. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-029",
+      "subject": "Upcoming Company Event: Save the Date!",
+      "body": "Dear team members, We are excited to announce our upcoming company event scheduled for next month. It will be a great opportunity to celebrate our successes and strengthen our team spirit. More details regarding the event venue, activities, and agenda will be shared soon. Please mark your calendars and stay tuned for further updates. We look forward to having a memorable time together! Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations",
+        "Business"
+      ]
+    },
+    {
+      "email_id": "EML-030",
+      "subject": "Upcoming Team Meeting Agenda",
+      "body": "Hello team, I hope you are all doing well. I would like to share the agenda for our upcoming team meeting scheduled for next Monday. We will be discussing the progress on our current projects, upcoming deadlines, and any challenges we are facing. Please review the attached document with the detailed agenda and come prepared with any updates or questions. Looking forward to a productive meeting. Thank you.",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-031",
+      "subject": "Upcoming Company Event: Save the Date!",
+      "body": "Dear Team, We are excited to announce that our annual company picnic will be held on Saturday, August 28th at Central Park. Join us for a fun-filled day of games, food, and team building activities. More details and RSVP instructions will be sent out soon. Save the date and get ready for a memorable day with your colleagues! Best regards, [Company Name] HR Team",
+      "labels": [
+        "Events & Invitations",
+        "Business"
+      ]
+    },
+    {
+      "email_id": "EML-032",
+      "subject": "Upcoming Company Holiday Party",
+      "body": "Dear team, We are excited to announce that our annual company holiday party will be held on December 15th at the Grand Hotel. Join us for an evening of celebration, delicious food, and fun activities. Please RSVP by December 5th to secure your spot. We look forward to seeing you there! Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-033",
+      "subject": "Important Update: Project Deadline Extension",
+      "body": "Dear Team, I hope this message finds you well. Due to unforeseen circumstances, we have decided to extend the deadline for the upcoming project. The new deadline is now set for next Friday, allowing us more time to ensure the quality of our work. Please adjust your timelines accordingly and reach out if you have any questions or concerns. Thank you for your understanding and continued hard work. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-034",
+      "subject": "Important Update: Your Flight Details",
+      "body": "Dear [Name],\n\nWe wanted to inform you about some changes to your upcoming flight. Due to unforeseen circumstances, the departure time has been shifted by 2 hours. Please review the updated details in your itinerary and make any necessary adjustments to your schedule. If you have any questions or concerns, feel free to contact our customer support team for assistance. We apologize for any inconvenience this may cause and appreciate your understanding.\n\nSafe travels,\nThe Travel Agency Team",
+      "labels": [
+        "Travel & Bookings",
+        "Customer Support"
+      ]
+    },
+    {
+      "email_id": "EML-035",
+      "subject": "Important Update: Meeting Rescheduled",
+      "body": "Dear Team, I hope this message finds you well. Due to unforeseen circumstances, we have to reschedule the upcoming team meeting to next Friday at 10:00 AM. Your presence is crucial as we will be discussing the latest project updates and future plans. Please confirm your availability for the new schedule. Thank you for your understanding and cooperation. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-036",
+      "subject": "Meeting Reminder: Quarterly Sales Review",
+      "body": "Dear Team, This is a friendly reminder of our upcoming Quarterly Sales Review meeting scheduled for this Friday at 10:00 AM. Please ensure you have prepared your reports and any updates to share during the meeting. The agenda will cover the performance of Q3 and projections for Q4. Your presence and active participation are highly encouraged. Looking forward to a productive session. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-037",
+      "subject": "Upcoming Team Building Event",
+      "body": "Dear Team, We are excited to announce our upcoming team building event scheduled for next month. This event will be a great opportunity for all of us to bond and strengthen our teamwork. Stay tuned for more details regarding the activities and schedule. We look forward to seeing you all there! Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-038",
+      "subject": "Confirmation of Your Flight Booking",
+      "body": "Dear Mr. Smith, We are writing to confirm your flight booking from New York to London on July 15th, 2022. Your flight details are as follows: Flight Number: AB1234 Departure: JFK International Airport Arrival: London Heathrow Airport Please ensure you arrive at least 2 hours before your flight. If you have any questions or need assistance, feel free to contact our customer support team. We look forward to welcoming you on board. Safe travels! Best regards, The Airline Team",
+      "labels": [
+        "Travel & Bookings"
+      ]
+    },
+    {
+      "email_id": "EML-039",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear Team, This is a reminder that our quarterly performance review meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please come prepared with your updates and any questions you may have. We will be discussing the progress of ongoing projects and setting goals for the upcoming quarter. Looking forward to a productive meeting. Regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-040",
+      "subject": "Important Update: Changes to Your Account Settings",
+      "body": "Dear valued customer, We wanted to inform you about some important updates we've made to our platform. To enhance security, we have added a two-step verification process for all accounts. You will now be required to verify your identity using a unique code sent to your registered email or phone number. These changes are aimed at protecting your account and personal information. Please ensure you update your settings accordingly to avoid any disruptions to your service. Thank you for your attention to this matter.",
+      "labels": [
+        "Customer Support",
+        "Finance & Bills"
+      ]
+    },
+    {
+      "email_id": "EML-041",
+      "subject": "Important Update: Company Meeting Rescheduled",
+      "body": "Dear Team, I hope this message finds you well. Due to unforeseen circumstances, the company meeting scheduled for this Friday will be rescheduled to next week. The new date and time will be communicated shortly. We apologize for any inconvenience this may cause and appreciate your understanding. Thank you for your cooperation. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-042",
+      "subject": "Important Updates on Your Account",
+      "body": "Dear valued customer, we would like to inform you about some important updates regarding your account. Please log in to your account to review the changes and ensure that your information is up to date. If you have any questions or need assistance, feel free to reach out to our customer support team. Thank you for choosing our services.",
+      "labels": [
+        "Customer Support",
+        "Finance & Bills"
+      ]
+    },
+    {
+      "email_id": "EML-043",
+      "subject": "Meeting Confirmation for Tomorrow",
+      "body": "Dear team, This is a friendly reminder that our weekly team meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please come prepared with updates on your projects and any agenda items you would like to discuss. Looking forward to a productive meeting. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-044",
+      "subject": "Regarding Your Recent Purchase",
+      "body": "Dear valued customer, We hope you are enjoying your recent purchase from our online store. We wanted to reach out and ensure that everything is to your satisfaction. If you have any questions or concerns, please don't hesitate to contact our customer support team. Your feedback is important to us as we strive to provide the best shopping experience for our customers. Thank you for choosing our brand!",
+      "labels": [
+        "Business",
+        "Customer Support"
+      ]
+    },
+    {
+      "email_id": "EML-045",
+      "subject": "Important Update: Payment Reminder",
+      "body": "Dear Customer, This is a reminder that your payment for invoice #123456 is due in 3 days. Please ensure timely payment to avoid any disruptions to your services. If you have already made the payment, kindly disregard this message. Thank you for your prompt attention to this matter.",
+      "labels": [
+        "Finance & Bills"
+      ]
+    },
+    {
+      "email_id": "EML-046",
+      "subject": "Upcoming Team Meeting Agenda",
+      "body": "Dear Team, I hope this email finds you well. I would like to share the agenda for our upcoming team meeting scheduled for next Monday at 10 AM. We will be discussing the progress on ongoing projects, upcoming deadlines, and any roadblocks that need to be addressed. Please come prepared with updates and any relevant materials. Looking forward to a productive meeting. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-047",
+      "subject": "Invitation to Our Virtual Product Launch Event",
+      "body": "Dear valued customers, we are excited to invite you to our virtual product launch event happening next week. Join us as we unveil our latest innovations and share exclusive insights into our upcoming projects. Don't miss this opportunity to be the first to experience our newest offerings. Register now to secure your spot and receive a special gift during the event. We look forward to seeing you there!",
+      "labels": [
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-048",
+      "subject": "Meeting Reminder: Quarterly Performance Review",
+      "body": "Hello team, Just a friendly reminder that our quarterly performance review meeting is scheduled for tomorrow at 10:00 AM in the conference room. Please come prepared with your progress updates and any challenges you may have faced. This meeting is crucial for aligning our goals and objectives for the next quarter. Your punctual attendance is greatly appreciated. Thank you and see you all there!",
+      "labels": [
+        "Business",
+        "Reminders"
+      ]
+    },
+    {
+      "email_id": "EML-049",
+      "subject": "Meeting Schedule Update",
+      "body": "Dear team, Due to unforeseen circumstances, we need to reschedule our upcoming meeting from tomorrow to next week Thursday at the same time. Please adjust your calendars accordingly and let me know if this new date works for everyone. Apologies for any inconvenience this may cause. Thank you for your understanding. Best regards, [Your Name]",
+      "labels": [
+        "Business",
+        "Events & Invitations"
+      ]
+    },
+    {
+      "email_id": "EML-050",
+      "subject": "Upcoming Team Building Event - RSVP Required",
+      "body": "Dear Team Members, We are excited to announce our upcoming team building event on the 25th of April at the local park. This event will be a great opportunity for us to bond and strengthen our teamwork. Please RSVP by the end of this week so we can finalize the arrangements. We encourage everyone to participate and contribute ideas for team building activities. Looking forward to seeing you all there! Best regards, [Your Name]",
+      "labels": [
+        "Events & Invitations"
+      ]
+    }
+  ]
+}

@@ -30,7 +30,6 @@ export function RunProgress({ run, steps }: RunProgressProps) {
 
   return (
     <div className="space-y-3">
-      {/* Segmented progress bar */}
       <div className="flex gap-2 h-2 w-full">
         {steps.map((step) => {
           const state = run.stepStates[step.id];
@@ -44,7 +43,6 @@ export function RunProgress({ run, steps }: RunProgressProps) {
         })}
       </div>
 
-      {/* Step labels underneath, aligned to segments */}
       <div className="flex gap-2">
         {steps.map((step) => {
           const state = run.stepStates[step.id];

@@ -1,23 +1,5 @@
-/**
- * Seed script — fetches real datasets from HuggingFace and creates demo workflow definitions.
- *
- * Usage: npx tsx scripts/seed-demo.ts
- *
- * Datasets:
- *   - IT Helpdesk Tickets (Console-AI/IT-helpdesk-synthetic-tickets)
- *   - Resume Screening (AzharAli05/Resume-Screening-Dataset)
- *
- * Workflows:
- *   - IT Ticket Triage + Response
- *   - Resume Screening
- */
-
 import fs from "fs";
 import path from "path";
-
-// ---------------------------------------------------------------------------
-// Paths
-// ---------------------------------------------------------------------------
 
 const DATA_ROOT = path.join(process.cwd(), "data");
 const DATASETS_DIR = path.join(DATA_ROOT, "datasets");
@@ -25,10 +7,6 @@ const WORKFLOWS_DIR = path.join(DATA_ROOT, "workflows");
 
 fs.mkdirSync(DATASETS_DIR, { recursive: true });
 fs.mkdirSync(WORKFLOWS_DIR, { recursive: true });
-
-// ---------------------------------------------------------------------------
-// HuggingFace rows API helper
-// ---------------------------------------------------------------------------
 
 const HF_ROWS_API = "https://datasets-server.huggingface.co/rows";
 
@@ -49,10 +27,6 @@ async function fetchHFRows(
   };
   return body.rows.map((r) => r.row);
 }
-
-// ---------------------------------------------------------------------------
-// Dataset: IT Helpdesk Tickets
-// ---------------------------------------------------------------------------
 
 async function seedITTickets() {
   const filePath = path.join(DATASETS_DIR, "it-tickets.json");
@@ -99,10 +73,6 @@ async function seedITTickets() {
   console.log(`  ✓ Created ${filePath} (${items.length} items)`);
 }
 
-// ---------------------------------------------------------------------------
-// Dataset: Resume Screening
-// ---------------------------------------------------------------------------
-
 async function seedResumes() {
   const filePath = path.join(DATASETS_DIR, "resumes.json");
 
@@ -146,11 +116,42 @@ async function seedResumes() {
   console.log(`  ✓ Created ${filePath} (${items.length} items)`);
 }
 
-// ---------------------------------------------------------------------------
-// Workflow definitions
-// ---------------------------------------------------------------------------
+async function seedEmailClassification() {
+  const filePath = path.join(DATASETS_DIR, "email-classification.json");
 
-// Fixed IDs so the script is idempotent
+  console.log("Fetching email classification data from HuggingFace...");
+  const rows = await fetchHFRows(
+    "imnim/multiclass-email-classification",
+    0,
+    50
+  );
+
+  const items = rows.map((row, i) => ({
+    email_id: `EML-${String(i + 1).padStart(3, "0")}`,
+    subject: row.subject as string,
+    body: row.body as string,
+    labels: Array.isArray(row.labels)
+      ? row.labels.filter((label): label is string => typeof label === "string")
+      : [],
+  }));
+
+  const dataset = {
+    config: {
+      id: "email-classification",
+      name: "Multiclass Email Classification Dataset",
+      description:
+        "Multi-label email samples from imnim/multiclass-email-classification on HuggingFace",
+      source: "huggingface:imnim/multiclass-email-classification",
+      fields: ["email_id", "subject", "body", "labels"],
+      itemCount: items.length,
+    },
+    items,
+  };
+
+  fs.writeFileSync(filePath, JSON.stringify(dataset, null, 2));
+  console.log(`  ✓ Created ${filePath} (${items.length} items)`);
+}
+
 const IT_WORKFLOW_ID = "demo-it-ticket-triage";
 const RESUME_WORKFLOW_ID = "demo-resume-screening";
 
@@ -339,11 +340,11 @@ function createResumeScreeningWorkflow() {
           type: "llm",
           model: "gpt-4o-mini",
           systemPrompt:
-            "You are a resume screening assistant. Analyze the provided resume and extract key qualifications, skills, and experience. Then assess the candidate's fit for the specified role. Be objective and fair.",
+            "You are a resume screening assistant. Analyze resumes and return structured JSON assessments. Be objective and fair.",
           userPrompt:
-            "Resume:\n{{input.resume_text}}\n\nRole Applied For: {{input.role}}\n\nJob Description:\n{{input.job_description}}\n\nPlease:\n1. Extract key qualifications and skills\n2. Assess fit for the role\n3. Provide a recommendation (strong_yes, yes, maybe, no)\n4. Explain your reasoning",
+            'Resume:\n{{input.resume_text}}\n\nRole Applied For: {{input.role}}\n\nJob Description:\n{{input.job_description}}\n\nAnalyze this resume and return JSON with exactly these fields:\n{\n  "qualifications": "Key qualifications, skills, education, and relevant experience (2-3 sentences)",\n  "fit_assessment": "How well the candidate fits the specified role (2-3 sentences)",\n  "recommendation": "strong_yes | yes | maybe | no",\n  "reasoning": "Brief explanation for the recommendation (1-2 sentences)"\n}',
           temperature: 0.5,
-          responseFormat: "text",
+          responseFormat: "json",
         },
         position: { x: 300, y: 150 },
       },
@@ -410,14 +411,16 @@ function createResumeScreeningWorkflow() {
           action: "append_row",
           params: {
             spreadsheetId: "YOUR_SPREADSHEET_ID",
-            range: "Sheet1!A:F",
+            range: "Sheet1!A:H",
             values: [
               "{{input.resume_id}}",
               "{{input.role}}",
               "{{input.decision}}",
               "{{input.reason_for_decision}}",
-              "{{steps.llm-screen.result}}",
-              "Approved",
+              "{{steps.llm-screen.result.qualifications}}",
+              "{{steps.llm-screen.result.fit_assessment}}",
+              "{{steps.llm-screen.result.recommendation}}",
+              "{{steps.llm-screen.result.reasoning}}",
             ],
           },
         },
@@ -434,10 +437,11 @@ function createResumeScreeningWorkflow() {
           params: {
             databaseId: "YOUR_NOTION_DATABASE_ID",
             properties: {
-              Name: "{{input.resume_id}}",
-              Role: "{{input.role}}",
-              Decision: "{{input.decision}}",
-              Assessment: "{{steps.llm-screen.result}}",
+              Name: "{{input.resume_id}} — {{input.role}}",
+              Recommendation: "{{steps.llm-screen.result.recommendation}}",
+              Qualifications: "{{steps.llm-screen.result.qualifications}}",
+              Assessment: "{{steps.llm-screen.result.fit_assessment}}",
+              Reasoning: "{{steps.llm-screen.result.reasoning}}",
             },
           },
         },
@@ -485,19 +489,14 @@ function createResumeScreeningWorkflow() {
   console.log(`  ✓ Created workflow: ${workflow.name} (${filePath})`);
 }
 
-// ---------------------------------------------------------------------------
-// Main
-// ---------------------------------------------------------------------------
-
 async function main() {
   console.log("🌱 Action Demo Seeder\n");
 
-  // 1. Fetch and write datasets from HuggingFace
   console.log("--- Datasets ---");
   await seedITTickets();
   await seedResumes();
+  await seedEmailClassification();
 
-  // 2. Create workflow definitions
   console.log("\n--- Workflows ---");
   createITTicketTriageWorkflow();
   createResumeScreeningWorkflow();

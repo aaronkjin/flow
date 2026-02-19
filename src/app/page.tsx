@@ -142,9 +142,7 @@ export default function DashboardPage() {
     <div>
       <Header title="Dashboard" />
       <div className="p-8 space-y-8">
-        {/* Stats cards */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          {/* Total Workflows */}
           <Card>
             <CardContent className="p-6">
               <span className="text-sm font-medium text-muted-foreground">
@@ -156,7 +154,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Total Runs */}
           <Card>
             <CardContent className="p-6">
               <span className="text-sm font-medium text-muted-foreground">
@@ -187,7 +184,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Pending Reviews */}
           <Card>
             <CardContent className="p-6">
               <span className="text-sm font-medium text-muted-foreground">
@@ -199,7 +195,6 @@ export default function DashboardPage() {
             </CardContent>
           </Card>
 
-          {/* Success Rate */}
           <Card>
             <CardContent className="p-6">
               <span className="text-sm font-medium text-muted-foreground">
@@ -227,7 +222,6 @@ export default function DashboardPage() {
           </Card>
         </div>
 
-        {/* Recent runs */}
         {recentRuns.length === 0 ? (
           <div className="flex items-center gap-5 p-8">
             <Play className="size-10 text-muted-foreground/40 shrink-0" />
@@ -288,7 +282,6 @@ export default function DashboardPage() {
           </Card>
         )}
 
-        {/* Quick actions */}
         <div className="flex gap-4">
           <Button
             variant="ghost"

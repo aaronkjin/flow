@@ -4,10 +4,6 @@ import type { Run, WorkflowDefinition } from "@/lib/engine/types";
 
 const DATA_ROOT = path.join(process.cwd(), "data");
 
-/**
- * Generic JSON file store — adapted from reference's _save/_load pattern.
- * In-memory cache for fast reads, write-through to disk.
- */
 export class JsonStore<T extends { id: string }> {
   private directory: string;
   private cache: Map<string, T> = new Map();
@@ -28,7 +24,6 @@ export class JsonStore<T extends { id: string }> {
     return path.join(this.directory, `${id}.json`);
   }
 
-  /** Load all JSON files from directory into cache on first access. */
   private loadAll(): void {
     if (this.loaded) return;
     this.ensureDirectory();
@@ -39,7 +34,6 @@ export class JsonStore<T extends { id: string }> {
         const item = JSON.parse(raw) as T;
         this.cache.set(item.id, item);
       } catch {
-        // Skip corrupt files
       }
     }
     this.loaded = true;
@@ -55,7 +49,6 @@ export class JsonStore<T extends { id: string }> {
     const cached = this.cache.get(id);
     if (cached) return cached;
 
-    // Fallback: try reading directly from disk (handles race with other processes)
     const fp = this.filePath(id);
     if (fs.existsSync(fp)) {
       try {
@@ -88,10 +81,6 @@ export class JsonStore<T extends { id: string }> {
   }
 }
 
-/**
- * Append an item to a JSON array file (used for trace events).
- * Creates the file with an array if it doesn't exist.
- */
 export function appendToJsonArray<T>(filepath: string, item: T): void {
   const dir = path.dirname(filepath);
   if (!fs.existsSync(dir)) {
@@ -111,9 +100,6 @@ export function appendToJsonArray<T>(filepath: string, item: T): void {
   fs.writeFileSync(filepath, JSON.stringify(arr, null, 2), "utf-8");
 }
 
-/**
- * Read a JSON array file. Returns empty array if file doesn't exist.
- */
 export function readJsonArray<T>(filepath: string): T[] {
   if (!fs.existsSync(filepath)) return [];
   try {
@@ -124,7 +110,6 @@ export function readJsonArray<T>(filepath: string): T[] {
   }
 }
 
-// --- Singleton stores (survive Next.js HMR in dev) ---
 
 const globalForStores = globalThis as unknown as {
   __workflowStore?: JsonStore<WorkflowDefinition>;

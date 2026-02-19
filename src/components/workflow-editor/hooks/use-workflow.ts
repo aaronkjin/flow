@@ -17,29 +17,32 @@ import dagre from "@dagrejs/dagre";
 import type {
   StepType,
   StepConfig,
+  AgentStepConfig,
+  SubWorkflowStepConfig,
   WorkflowDefinition,
   StepDefinition,
   EdgeDefinition,
 } from "@/lib/engine/types";
+import type {
+  CopilotDraftStep,
+  CopilotDraftEdge,
+} from "@/lib/workflow-copilot/types";
 
-// ── Exported types (consumed by Agent 5B) ──────────────────────────
 
 export interface WorkflowNodeData {
   label: string;
   stepType: StepType;
   config: StepConfig;
-  [key: string]: unknown; // required by React Flow v12 for Node<T> constraint
+  [key: string]: unknown;
 }
 
 export interface UseWorkflowReturn {
-  // React Flow state
   nodes: Node<WorkflowNodeData>[];
   edges: Edge[];
   onNodesChange: OnNodesChange<Node<WorkflowNodeData>>;
   onEdgesChange: OnEdgesChange;
   onConnect: OnConnect;
 
-  // Selection
   selectedNodeId: string | null;
   selectNode: (nodeId: string | null) => void;
   selectedNode: {
@@ -49,7 +52,6 @@ export interface UseWorkflowReturn {
     config: StepConfig;
   } | null;
 
-  // Node CRUD
   addNode: (
     type: StepType,
     position: { x: number; y: number },
@@ -59,27 +61,43 @@ export interface UseWorkflowReturn {
   updateNodeName: (nodeId: string, name: string) => void;
   deleteSelected: () => void;
 
-  // Workflow metadata
   workflowName: string;
   setWorkflowName: (name: string) => void;
   workflowDescription: string;
   setWorkflowDescription: (desc: string) => void;
 
-  // Persistence
   saveWorkflow: () => Promise<void>;
   runWorkflow: (input?: Record<string, unknown>) => Promise<string>;
 
-  // Layout
   autoLayout: () => void;
 
-  // Status
+  replaceWorkflowGraph: (payload: {
+    nodes: Node<WorkflowNodeData>[];
+    edges: Edge[];
+    workflowName?: string;
+    workflowDescription?: string;
+  }) => void;
+
+  getWorkflowSnapshot: () => {
+    steps: CopilotDraftStep[];
+    edges: CopilotDraftEdge[];
+    workflowName: string;
+    workflowDescription: string;
+  } | null;
+
+  previewNodes: Node<WorkflowNodeData>[] | null;
+  previewEdges: Edge[] | null;
+  setPreview: (
+    nodes: Node<WorkflowNodeData>[] | null,
+    edges: Edge[] | null
+  ) => void;
+
   isDirty: boolean;
   isSaving: boolean;
   isLoading: boolean;
   workflowId: string | null;
 }
 
-// ── Default configs per step type ──────────────────────────────────
 
 const DEFAULT_CONFIGS: Record<StepType, StepConfig> = {
   trigger: { type: "trigger", triggerType: "manual" },
@@ -113,6 +131,22 @@ const DEFAULT_CONFIGS: Record<StepType, StepConfig> = {
     params: {},
   },
   condition: { type: "condition", expression: "" },
+  agent: {
+    type: "agent",
+    model: "gpt-4o-mini",
+    systemPrompt: "You are a helpful agent that completes tasks using the available tools.",
+    taskPrompt: "",
+    tools: [],
+    maxIterations: 10,
+    temperature: 0.3,
+    hitlOnLowConfidence: false,
+    confidenceThreshold: 0.5,
+  } as AgentStepConfig,
+  "sub-workflow": {
+    type: "sub-workflow",
+    workflowId: "",
+    inputMapping: {},
+  } as SubWorkflowStepConfig,
 };
 
 const DEFAULT_LABELS: Record<StepType, string> = {
@@ -122,9 +156,10 @@ const DEFAULT_LABELS: Record<StepType, string> = {
   hitl: "HITL Review",
   connector: "Connector",
   condition: "Condition",
+  agent: "Agent",
+  "sub-workflow": "Sub-Workflow",
 };
 
-// ── Dagre auto-layout helper ───────────────────────────────────────
 
 function getLayoutedElements(
   nodes: Node<WorkflowNodeData>[],
@@ -146,7 +181,6 @@ function getLayoutedElements(
   return { nodes: layoutedNodes, edges };
 }
 
-// ── Hook ────────────────────────────────────────────────────────────
 
 export function useWorkflow(workflowId?: string): UseWorkflowReturn {
   const [nodes, setNodes, onNodesChange] = useNodesState<Node<WorkflowNodeData>>([]);
@@ -165,7 +199,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
   const reactFlow = useReactFlow();
   const loadedRef = useRef(false);
 
-  // ── Load workflow on mount ─────────────────────────────────────
 
   useEffect(() => {
     if (!workflowId || loadedRef.current) return;
@@ -183,7 +216,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
         setWorkflowName(workflow.name);
         setWorkflowDescription(workflow.description);
 
-        // Deserialise steps → nodes
         const loadedNodes: Node<WorkflowNodeData>[] = workflow.steps.map(
           (step: StepDefinition) => ({
             id: step.id,
@@ -197,7 +229,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
           })
         );
 
-        // Deserialise edges
         const loadedEdges: Edge[] = workflow.edges.map(
           (edge: EdgeDefinition) => ({
             id: edge.id,
@@ -214,7 +245,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
         setNodes(loadedNodes);
         setEdges(loadedEdges);
 
-        // Restore viewport
         if (workflow.canvasState?.viewport) {
           requestAnimationFrame(() => {
             reactFlow.setViewport(workflow.canvasState!.viewport);
@@ -230,7 +260,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     load();
   }, [workflowId, setNodes, setEdges, reactFlow]);
 
-  // ── Selection ──────────────────────────────────────────────────
 
   const selectNode = useCallback((nodeId: string | null) => {
     setSelectedNodeId(nodeId);
@@ -248,7 +277,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     };
   }, [selectedNodeId, nodes]);
 
-  // ── Node CRUD ──────────────────────────────────────────────────
 
   const addNode = useCallback(
     (
@@ -323,7 +351,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     setIsDirty(true);
   }, [selectedNodeId, setNodes, setEdges]);
 
-  // ── Edge connect ───────────────────────────────────────────────
 
   const onConnect: OnConnect = useCallback(
     (connection) => {
@@ -340,7 +367,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     [setEdges]
   );
 
-  // ── Wrap onNodesChange to track dirty ──────────────────────────
 
   const handleNodesChange: OnNodesChange<Node<WorkflowNodeData>> = useCallback(
     (changes) => {
@@ -366,7 +392,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     [onEdgesChange]
   );
 
-  // ── Serialisation helpers ──────────────────────────────────────
 
   const serialise = useCallback((): {
     steps: StepDefinition[];
@@ -395,7 +420,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     return { steps, edges: edgeDefs, canvasState: { viewport } };
   }, [nodes, edges, reactFlow]);
 
-  // ── Persistence ────────────────────────────────────────────────
 
   const saveWorkflow = useCallback(async () => {
     setIsSaving(true);
@@ -403,7 +427,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
       const { steps, edges: edgeDefs, canvasState } = serialise();
 
       if (savedWorkflowId) {
-        // PUT update
         const res = await fetch(`/api/workflows/${savedWorkflowId}`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
@@ -417,7 +440,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
         });
         if (!res.ok) throw new Error("Failed to update workflow");
       } else {
-        // POST create
         const res = await fetch("/api/workflows", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -443,7 +465,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
 
   const runWorkflow = useCallback(
     async (input?: Record<string, unknown>): Promise<string> => {
-      // Save first if dirty
       if (isDirty || !savedWorkflowId) {
         await saveWorkflow();
       }
@@ -464,7 +485,6 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     [isDirty, savedWorkflowId, saveWorkflow]
   );
 
-  // ── Auto-layout ────────────────────────────────────────────────
 
   const autoLayout = useCallback(() => {
     const { nodes: layoutedNodes, edges: layoutedEdges } =
@@ -477,7 +497,74 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     });
   }, [nodes, edges, setNodes, setEdges, reactFlow]);
 
-  // ── Return ─────────────────────────────────────────────────────
+
+  const replaceWorkflowGraph = useCallback(
+    (payload: {
+      nodes: Node<WorkflowNodeData>[];
+      edges: Edge[];
+      workflowName?: string;
+      workflowDescription?: string;
+    }) => {
+      setNodes(payload.nodes);
+      setEdges(payload.edges);
+      setSelectedNodeId(null);
+      if (payload.workflowName) setWorkflowName(payload.workflowName);
+      if (payload.workflowDescription) setWorkflowDescription(payload.workflowDescription);
+      setIsDirty(true);
+      requestAnimationFrame(() => {
+        reactFlow.fitView({ padding: 0.2 });
+      });
+    },
+    [setNodes, setEdges, reactFlow]
+  );
+
+
+  const getWorkflowSnapshot = useCallback((): {
+    steps: CopilotDraftStep[];
+    edges: CopilotDraftEdge[];
+    workflowName: string;
+    workflowDescription: string;
+  } | null => {
+    if (nodes.length === 0) return null;
+
+    const steps: CopilotDraftStep[] = nodes.map((node) => ({
+      id: node.id,
+      type: node.data.stepType as CopilotDraftStep["type"],
+      name: node.data.label,
+      config: { ...node.data.config } as Record<string, unknown>,
+    }));
+
+    const draftEdges: CopilotDraftEdge[] = edges.map((edge) => ({
+      source: edge.source,
+      target: edge.target,
+      label: typeof edge.label === "string" ? edge.label : undefined,
+    }));
+
+    return {
+      steps,
+      edges: draftEdges,
+      workflowName,
+      workflowDescription,
+    };
+  }, [nodes, edges, workflowName, workflowDescription]);
+
+
+  const [previewNodes, setPreviewNodes] = useState<Node<WorkflowNodeData>[] | null>(null);
+  const [previewEdges, setPreviewEdges] = useState<Edge[] | null>(null);
+
+  const setPreview = useCallback(
+    (pNodes: Node<WorkflowNodeData>[] | null, pEdges: Edge[] | null) => {
+      setPreviewNodes(pNodes);
+      setPreviewEdges(pEdges);
+      if (pNodes) {
+        requestAnimationFrame(() => {
+          reactFlow.fitView({ padding: 0.2 });
+        });
+      }
+    },
+    [reactFlow]
+  );
+
 
   return {
     nodes,
@@ -516,6 +603,13 @@ export function useWorkflow(workflowId?: string): UseWorkflowReturn {
     runWorkflow,
 
     autoLayout,
+
+    replaceWorkflowGraph,
+    getWorkflowSnapshot,
+
+    previewNodes,
+    previewEdges,
+    setPreview,
 
     isDirty,
     isSaving,

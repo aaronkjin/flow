@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server";
 import { getRunStore, getWorkflowStore } from "@/lib/persistence/store";
 import { startRun } from "@/lib/engine/engine";
 
+export const dynamic = "force-dynamic";
+
 export async function GET(request: NextRequest) {
   const workflowId = request.nextUrl.searchParams.get("workflowId");
   let runs = getRunStore().getAll();

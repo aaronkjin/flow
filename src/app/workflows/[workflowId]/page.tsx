@@ -8,7 +8,7 @@ import { useZoneNav } from "@/hooks/use-zone-nav";
 import { useCanvasNav } from "@/hooks/use-canvas-nav";
 import WorkflowCanvas from "@/components/workflow-editor/workflow-canvas";
 import { BlockPalette } from "@/components/workflow-editor/block-palette";
-import { ConfigPanel } from "@/components/workflow-editor/config-panel";
+import { EditorSidePanel } from "@/components/workflow-editor/editor-side-panel";
 import { Toolbar } from "@/components/workflow-editor/toolbar";
 import { Button } from "@/components/ui/button";
 import { Loader2, PanelRight, PanelLeft } from "lucide-react";
@@ -74,8 +74,15 @@ function EditorContent({ workflowId }: { workflowId: string }) {
             />
           </div>
         )}
-        <div className={`flex-1 relative ${zoneOutline("canvas")}`}>
+        <div className="flex-1 relative">
           <WorkflowCanvas workflow={workflow} focusedNodeId={focusedNodeId ?? undefined} />
+          {activeZone === "canvas" && (
+            <div
+              className={`absolute inset-0 pointer-events-none z-50 rounded-lg border-2 ${
+                isLocked ? "border-orange-500/80" : "border-orange-500/50"
+              }`}
+            />
+          )}
         </div>
         {configCollapsed ? (
           <div className="w-10 flex flex-col items-center border-l bg-muted/30 shrink-0 py-2">
@@ -91,7 +98,7 @@ function EditorContent({ workflowId }: { workflowId: string }) {
           </div>
         ) : (
           <div className={`relative ${zoneOutline("config")}`}>
-            <ConfigPanel
+            <EditorSidePanel
               workflow={workflow}
               onCollapse={() => setConfigCollapsed(true)}
             />

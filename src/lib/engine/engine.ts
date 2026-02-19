@@ -21,20 +21,10 @@ import {
   getTracePath,
 } from "../persistence/store";
 
-// Step executor imports — will be implemented in Phase 2
-// import { executeLLMStep } from "../steps/llm";
-// import { executeJudgeStep } from "../steps/judge";
-// import { executeConnectorStep } from "../steps/connector";
-
-// --- Public API ---
-
-/**
- * Start a new run for a workflow.
- * Creates the run record, fires async execution, returns immediately.
- */
 export async function startRun(
   workflowId: string,
-  input: Record<string, unknown>
+  input: Record<string, unknown>,
+  options?: { parentRunId?: string; parentStepId?: string }
 ): Promise<Run> {
   const workflowStore = getWorkflowStore();
   const runStore = getRunStore();
@@ -55,9 +45,10 @@ export async function startRun(
     currentStepId: null,
     createdAt: now,
     updatedAt: now,
+    parentRunId: options?.parentRunId,
+    parentStepId: options?.parentStepId,
   };
 
-  // Initialize step states
   for (const step of workflow.steps) {
     run.stepStates[step.id] = {
       stepId: step.id,
@@ -72,7 +63,6 @@ export async function startRun(
     data: { workflowId, workflowName: workflow.name, input },
   });
 
-  // Fire-and-forget async execution
   executeRunAsync(workflow, run).catch((err) => {
     console.error(`Run ${run.id} failed unexpectedly:`, err);
   });
@@ -80,9 +70,6 @@ export async function startRun(
   return run;
 }
 
-/**
- * Resume a run after HITL decision.
- */
 export async function resumeRun(
   runId: string,
   decision: HITLDecision
@@ -113,7 +100,6 @@ export async function resumeRun(
   });
 
   if (decision.action === "reject") {
-    // Mark HITL step as failed and fail the run
     updateStepState(run, hitlStepId, {
       status: "failed",
       error: `Rejected: ${decision.comment || "No reason provided"}`,
@@ -121,13 +107,27 @@ export async function resumeRun(
     });
     updateRunStatus(run, "failed");
     run.error = `Rejected at HITL step: ${decision.comment || "No reason provided"}`;
+
+    run.tokenUsage = buildTokenUsageFromSteps(run);
+
     runStore.save(run.id, run);
 
     emitTrace(run.id, { type: "run_failed", data: { error: run.error } });
     return run;
   }
 
-  // Approve or edit — mark HITL step complete
+  if (hitlStep.type === "sub-workflow") {
+    updateStepState(run, hitlStepId, { status: "pending" });
+    updateRunStatus(run, "running");
+    runStore.save(run.id, run);
+
+    executeRunAsync(workflow, run).catch((err) => {
+      console.error(`Run ${run.id} sub-workflow resume failed:`, err);
+    });
+
+    return run;
+  }
+
   const hitlOutput: Record<string, unknown> = {
     decision: decision.action,
     comment: decision.comment,
@@ -152,7 +152,6 @@ export async function resumeRun(
   updateRunStatus(run, "running");
   runStore.save(run.id, run);
 
-  // Continue execution from next step
   executeRunAsync(workflow, run, hitlStepId).catch((err) => {
     console.error(`Run ${run.id} resume failed:`, err);
   });
@@ -160,9 +159,6 @@ export async function resumeRun(
   return run;
 }
 
-/**
- * Startup reconciliation: mark stale "running" runs as failed.
- */
 export function reconcileStaleRuns(): void {
   const runStore = getRunStore();
   const stale = runStore.getAll().filter((r) => r.status === "running");
@@ -181,18 +177,14 @@ export function reconcileStaleRuns(): void {
   }
 }
 
-// --- Internal Execution ---
-
-/**
- * Async execution loop. Runs steps in topological order.
- * If resumeAfterStepId is provided, starts from the step after it.
- */
 async function executeRunAsync(
   workflow: WorkflowDefinition,
   run: Run,
   resumeAfterStepId?: string
 ): Promise<void> {
   const runStore = getRunStore();
+  const { TokenTracker } = await import("./token-tracking");
+  const tokenTracker = new TokenTracker();
 
   try {
     if (run.status === "pending") {
@@ -200,9 +192,30 @@ async function executeRunAsync(
       runStore.save(run.id, run);
     }
 
+    for (const [stepId, state] of Object.entries(run.stepStates)) {
+      if (state.status === "completed" && state.output) {
+        const out = state.output as Record<string, unknown>;
+        if (out.usage) {
+          const u = out.usage as { promptTokens?: number; completionTokens?: number; totalTokens?: number };
+          tokenTracker.addUsage(stepId, {
+            promptTokens: u.promptTokens ?? 0,
+            completionTokens: u.completionTokens ?? 0,
+            totalTokens: u.totalTokens ?? 0,
+          }, (out.model as string) ?? undefined);
+        }
+        if (out.totalUsage) {
+          const u = out.totalUsage as { promptTokens?: number; completionTokens?: number; totalTokens?: number };
+          tokenTracker.addUsage(stepId, {
+            promptTokens: u.promptTokens ?? 0,
+            completionTokens: u.completionTokens ?? 0,
+            totalTokens: u.totalTokens ?? 0,
+          }, (out.model as string) ?? undefined);
+        }
+      }
+    }
+
     const sortedSteps = topologicalSort(workflow.steps, workflow.edges);
 
-    // If resuming, find where to start
     let startIndex = 0;
     if (resumeAfterStepId) {
       const idx = sortedSteps.findIndex((s) => s.id === resumeAfterStepId);
@@ -212,21 +225,17 @@ async function executeRunAsync(
     for (let i = startIndex; i < sortedSteps.length; i++) {
       const step = sortedSteps[i];
 
-      // Skip already-completed steps
       if (run.stepStates[step.id]?.status === "completed") continue;
       if (run.stepStates[step.id]?.status === "skipped") continue;
 
-      // Check if this step should be skipped (condition routing)
       if (shouldSkipStep(step, workflow, run)) {
         updateStepState(run, step.id, { status: "skipped" });
         runStore.save(run.id, run);
         continue;
       }
 
-      // Build interpolation context
       const context = buildContext(run);
 
-      // Mark step as running
       run.currentStepId = step.id;
       updateStepState(run, step.id, {
         status: "running",
@@ -242,12 +251,10 @@ async function executeRunAsync(
       });
 
       try {
-        // Dispatch to step executor
         const result = await executeStep(step, context, run, workflow);
 
         if (result.__hitlPause) {
-          // HITL step — pause execution
-          updateStepState(run, step.id, { status: "waiting_for_review" });
+          updateStepState(run, step.id, { status: "waiting_for_review", output: result });
           updateRunStatus(run, "waiting_for_review");
           runStore.save(run.id, run);
 
@@ -257,10 +264,9 @@ async function executeRunAsync(
             stepName: step.name,
             data: { instructions: (step.config as HITLStepConfig).instructions },
           });
-          return; // STOP execution — will resume via resumeRun()
+          return;
         }
 
-        // Step completed
         updateStepState(run, step.id, {
           status: "completed",
           output: result,
@@ -268,11 +274,32 @@ async function executeRunAsync(
         });
         runStore.save(run.id, run);
 
+        if (result.usage) {
+          const usage = result.usage as { promptTokens?: number; completionTokens?: number; totalTokens?: number };
+          tokenTracker.addUsage(step.id, {
+            promptTokens: usage.promptTokens ?? 0,
+            completionTokens: usage.completionTokens ?? 0,
+            totalTokens: usage.totalTokens ?? 0,
+          }, (result.model as string) ?? undefined);
+        }
+        if (result.totalUsage) {
+          const u = result.totalUsage as { promptTokens?: number; completionTokens?: number; totalTokens?: number };
+          tokenTracker.addUsage(step.id, {
+            promptTokens: u.promptTokens ?? 0,
+            completionTokens: u.completionTokens ?? 0,
+            totalTokens: u.totalTokens ?? 0,
+          }, (result.model as string) ?? undefined);
+        }
+
         emitTrace(run.id, {
           type: "step_completed",
           stepId: step.id,
           stepName: step.name,
-          data: { output: result },
+          data: {
+            output: result,
+            usage: result.usage ?? result.totalUsage ?? undefined,
+            model: result.model ?? undefined,
+          },
         });
       } catch (err) {
         const errorMsg = err instanceof Error ? err.message : String(err);
@@ -283,6 +310,7 @@ async function executeRunAsync(
         });
         updateRunStatus(run, "failed");
         run.error = `Step "${step.name}" failed: ${errorMsg}`;
+        run.tokenUsage = tokenTracker.getSummary();
         runStore.save(run.id, run);
 
         emitTrace(run.id, {
@@ -296,7 +324,7 @@ async function executeRunAsync(
       }
     }
 
-    // All steps done
+    run.tokenUsage = tokenTracker.getSummary();
     updateRunStatus(run, "completed");
     run.completedAt = new Date().toISOString();
     run.currentStepId = null;
@@ -310,14 +338,12 @@ async function executeRunAsync(
     const errorMsg = err instanceof Error ? err.message : String(err);
     updateRunStatus(run, "failed");
     run.error = `Unexpected engine error: ${errorMsg}`;
+    run.tokenUsage = tokenTracker.getSummary();
     runStore.save(run.id, run);
     emitTrace(run.id, { type: "run_failed", data: { error: run.error } });
   }
 }
 
-/**
- * Dispatch a step to the appropriate executor.
- */
 async function executeStep(
   step: StepDefinition,
   context: InterpolationContext,
@@ -328,11 +354,9 @@ async function executeStep(
 
   switch (step.type) {
     case "trigger":
-      // Trigger is a pass-through — input is already set
       return { ...run.input };
 
     case "llm": {
-      // Dynamic import to avoid circular deps and keep Phase 1 working
       const { executeLLMStep } = await import("../steps/llm");
       return await executeLLMStep(interpolatedConfig, context);
     }
@@ -345,7 +369,6 @@ async function executeStep(
     case "hitl": {
       const config = step.config as HITLStepConfig;
 
-      // Check auto-approve: if judge passed and autoApproveOnJudgePass is true
       if (config.autoApproveOnJudgePass) {
         const judgeStepId =
           config.judgeStepId ||
@@ -379,17 +402,34 @@ async function executeStep(
       return { result, branch: result ? "yes" : "no" };
     }
 
+    case "agent": {
+      const { executeAgentStep } = await import("../steps/agent");
+      const boundEmitTrace = (event: Omit<TraceEvent, "id" | "runId" | "timestamp">) => {
+        emitTrace(run.id, { ...event, stepId: step.id, stepName: step.name });
+      };
+      return await executeAgentStep(interpolatedConfig, context, boundEmitTrace);
+    }
+
+    case "sub-workflow": {
+      const { executeSubWorkflowStep } = await import("../steps/sub-workflow");
+      const boundEmitTrace = (event: Omit<TraceEvent, "id" | "runId" | "timestamp">) => {
+        emitTrace(run.id, { ...event, stepId: step.id, stepName: step.name });
+      };
+      const existingChildRunId = (
+        run.stepStates[step.id]?.output as Record<string, unknown> | undefined
+      )?.childRunId as string | undefined;
+      if (existingChildRunId) {
+        interpolatedConfig.__existingChildRunId = existingChildRunId;
+      }
+      return await executeSubWorkflowStep(interpolatedConfig, context, boundEmitTrace);
+    }
+
     default:
       throw new Error(`Unknown step type: ${step.type}`);
   }
 }
 
-// --- Helpers ---
-
-/**
- * Topological sort of steps based on edge connections.
- * Simple Kahn's algorithm.
- */
+ 
 export function topologicalSort(
   steps: StepDefinition[],
   edges: EdgeDefinition[]
@@ -434,10 +474,6 @@ export function topologicalSort(
   return sorted;
 }
 
-/**
- * Determine if a step should be skipped based on condition routing.
- * A step is skipped if it's only reachable from a condition branch that wasn't taken.
- */
 function shouldSkipStep(
   step: StepDefinition,
   workflow: WorkflowDefinition,
@@ -455,7 +491,6 @@ function shouldSkipStep(
     }
   }
 
-  // None of the incoming edges were satisfied; skip the step.
   return true;
 }
 
@@ -501,19 +536,30 @@ function isEdgeSatisfied(
     return decision === edgeLabel;
   }
 
-  // Default: the source step completed, so the edge is satisfied.
   return true;
 }
 
-/**
- * Build interpolation context from current run state.
- */
 function buildContext(run: Run): InterpolationContext {
   const steps: Record<string, Record<string, unknown>> = {};
 
   for (const [stepId, state] of Object.entries(run.stepStates)) {
     if (state.status === "completed" && state.output) {
-      steps[stepId] = state.output;
+      const output = { ...state.output };
+
+      if (
+        typeof output.result === "object" &&
+        output.result !== null &&
+        !Array.isArray(output.result)
+      ) {
+        const resultObj = output.result as Record<string, unknown>;
+        for (const [key, value] of Object.entries(resultObj)) {
+          if (!(key in output)) {
+            output[key] = value;
+          }
+        }
+      }
+
+      steps[stepId] = output;
     }
   }
 
@@ -534,6 +580,44 @@ function updateStepState(
     run.stepStates[stepId] = { stepId, status: "pending" };
   }
   Object.assign(run.stepStates[stepId], updates);
+}
+
+function buildTokenUsageFromSteps(run: Run) {
+  const total = { promptTokens: 0, completionTokens: 0, totalTokens: 0 };
+  const byStep: Record<string, { promptTokens: number; completionTokens: number; totalTokens: number }> = {};
+  let cost = 0;
+
+  let estimateCostFn: ((model: string, usage: { promptTokens: number; completionTokens: number; totalTokens: number }) => number) | null = null;
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    estimateCostFn = require("./token-tracking").estimateCost;
+  } catch {
+    estimateCostFn = null;
+  }
+
+  for (const [stepId, state] of Object.entries(run.stepStates)) {
+    if (state.status !== "completed" || !state.output) continue;
+    const out = state.output as Record<string, unknown>;
+    const usageRaw = (out.usage ?? out.totalUsage) as { promptTokens?: number; completionTokens?: number; totalTokens?: number } | undefined;
+    if (!usageRaw) continue;
+
+    const u = {
+      promptTokens: usageRaw.promptTokens ?? 0,
+      completionTokens: usageRaw.completionTokens ?? 0,
+      totalTokens: usageRaw.totalTokens ?? 0,
+    };
+    byStep[stepId] = u;
+    total.promptTokens += u.promptTokens;
+    total.completionTokens += u.completionTokens;
+    total.totalTokens += u.totalTokens;
+
+    const model = out.model as string | undefined;
+    if (model && estimateCostFn) {
+      cost += estimateCostFn(model, u);
+    }
+  }
+
+  return { total, byStep, estimatedCostUsd: cost };
 }
 
 function emitTrace(

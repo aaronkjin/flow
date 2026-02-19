@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter, useParams } from "next/navigation";
 import { useKeyboardNav } from "@/hooks/use-keyboard-nav";
 import { useZoneNav } from "@/hooks/use-zone-nav";
 import type { ReviewItem } from "@/lib/engine/types";
 import { Button } from "@/components/ui/button";
 import { ReviewPanel } from "@/components/review/review-panel";
+import type { ReviewPanelHandle } from "@/components/review/review-panel";
 import { Loader2, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
@@ -24,14 +25,24 @@ export default function ReviewDetailPage() {
 
   const isContentActive = activeZone === "content";
 
-  // Card count: Output + (Judge if present) + Action Bar
+  const reviewPanelRef = useRef<ReviewPanelHandle>(null);
+
   const hasJudge = !!review?.judgeAssessment;
   const cardCount = hasJudge ? 3 : 2;
+  const actionCardIndex = hasJudge ? 2 : 1;
 
-  const noOp = useCallback(() => {}, []);
+  const handleCardSelect = useCallback(
+    (index: number) => {
+      if (index === actionCardIndex) {
+        reviewPanelRef.current?.approve();
+      }
+    },
+    [actionCardIndex],
+  );
+
   const { getItemProps } = useKeyboardNav({
     itemCount: cardCount,
-    onSelect: noOp,
+    onSelect: handleCardSelect,
     enabled: isContentActive,
     gridColumns: hasJudge ? 2 : 1,
   });
@@ -124,7 +135,6 @@ export default function ReviewDetailPage() {
 
   return (
     <div className="max-w-6xl mx-auto py-12 px-8 space-y-8">
-      {/* Header */}
       <div className="flex items-center gap-3">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/review">
@@ -141,7 +151,7 @@ export default function ReviewDetailPage() {
         </div>
       </div>
 
-      <ReviewPanel review={review} getCardProps={getItemProps} />
+      <ReviewPanel review={review} getCardProps={getItemProps} actionRef={reviewPanelRef} />
     </div>
   );
 }

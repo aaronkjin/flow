@@ -15,6 +15,8 @@ import {
   FileText,
   Sheet,
   PanelLeft,
+  Bot,
+  Workflow,
   type LucideIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -24,7 +26,7 @@ import type { StepType } from "@/lib/engine/types";
 
 interface PaletteItem {
   label: string;
-  description: string;
+  description: React.ReactNode;
   stepType: StepType;
   icon: LucideIcon;
   dragData?: Record<string, unknown>;
@@ -70,6 +72,13 @@ const categories: PaletteCategory[] = [
         description: "Evaluate with criteria",
         stepType: "judge",
         icon: Scale,
+        dragData: {},
+      },
+      {
+        label: "Agent",
+        description: <><span className="font-heading italic">Action</span>-driven agent</>,
+        stepType: "agent" as StepType,
+        icon: Bot,
         dragData: {},
       },
     ],
@@ -138,6 +147,18 @@ const categories: PaletteCategory[] = [
       },
     ],
   },
+  {
+    name: "Workflows",
+    items: [
+      {
+        label: "Sub-Workflow",
+        description: "Run another workflow",
+        stepType: "sub-workflow" as StepType,
+        icon: Workflow,
+        dragData: {},
+      },
+    ],
+  },
 ];
 
 const typeColors: Record<StepType, string> = {
@@ -147,6 +168,8 @@ const typeColors: Record<StepType, string> = {
   hitl: "text-emerald-400",
   connector: "text-violet-400",
   condition: "text-stone-400",
+  agent: "text-rose-400",
+  "sub-workflow": "text-orange-400",
 };
 
 interface PaletteItemCardProps {
@@ -157,7 +180,13 @@ interface PaletteItemCardProps {
   onMouseLeave?: () => void;
 }
 
-function PaletteItemCard({ item, isKbFocused, focusRef, onMouseEnter, onMouseLeave }: PaletteItemCardProps) {
+function PaletteItemCard({
+  item,
+  isKbFocused,
+  focusRef,
+  onMouseEnter,
+  onMouseLeave,
+}: PaletteItemCardProps) {
   const Icon = item.icon;
 
   function onDragStart(event: React.DragEvent) {
@@ -167,7 +196,7 @@ function PaletteItemCard({ item, isKbFocused, focusRef, onMouseEnter, onMouseLea
         type: item.stepType,
         label: item.label,
         config: item.dragData ?? {},
-      })
+      }),
     );
     event.dataTransfer.effectAllowed = "move";
   }
@@ -202,34 +231,41 @@ interface BlockPaletteProps {
   addNode?: (
     type: StepType,
     position: { x: number; y: number },
-    options?: { label?: string; configOverrides?: Partial<Record<string, unknown>> }
+    options?: {
+      label?: string;
+      configOverrides?: Partial<Record<string, unknown>>;
+    },
   ) => void;
 }
 
-export function BlockPalette({ onCollapse, isActive, addNode }: BlockPaletteProps): React.JSX.Element {
-  const flatItems = useMemo(
-    () => categories.flatMap((c) => c.items),
-    [],
-  );
+export function BlockPalette({
+  onCollapse,
+  isActive,
+  addNode,
+}: BlockPaletteProps): React.JSX.Element {
+  const flatItems = useMemo(() => categories.flatMap((c) => c.items), []);
 
   const { getItemProps } = useKeyboardNav({
     itemCount: flatItems.length,
     onSelect: (index) => {
       if (!addNode) return;
       const item = flatItems[index];
-      addNode(item.stepType, { x: 300, y: 300 }, {
-        label: item.label,
-        configOverrides: item.dragData as Partial<Record<string, unknown>>,
-      });
+      addNode(
+        item.stepType,
+        { x: 300, y: 300 },
+        {
+          label: item.label,
+          configOverrides: item.dragData as Partial<Record<string, unknown>>,
+        },
+      );
     },
     enabled: isActive ?? false,
   });
 
-  // Build a map from flat index to category/item for rendering
   let flatIndex = 0;
 
   return (
-    <div className="w-60 border-r bg-background flex flex-col h-full">
+    <div className="w-60 min-w-60 max-w-60 border-r bg-background flex flex-col h-full overflow-hidden">
       <div className="px-4 py-4 border-b flex items-center justify-between gap-2">
         <h2 className="font-heading text-sm">Blocks</h2>
         {onCollapse && (

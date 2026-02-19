@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
@@ -26,6 +26,10 @@ import type {
   HITLStepConfig,
   ConnectorStepConfig,
   ConditionStepConfig,
+  AgentStepConfig,
+  AgentToolRef,
+  SubWorkflowStepConfig,
+  WorkflowBlockField,
   StepConfig,
   ConnectorType,
 } from "@/lib/engine/types";
@@ -34,13 +38,12 @@ import type { Node } from "@xyflow/react";
 interface ConfigPanelProps {
   workflow: UseWorkflowReturn;
   onCollapse?: () => void;
+  className?: string;
+  hideHeader?: boolean;
 }
 
-// Input class with subtle background tint so fields don't disappear on white
 const fieldClass =
   "bg-muted/50 border-transparent focus-visible:border-ring focus-visible:bg-background transition-colors";
-
-// ---------- helpers ----------
 
 function getPriorNodes(
   nodes: Node<WorkflowNodeData>[],
@@ -56,8 +59,6 @@ function getNodesByType(
 ): Node<WorkflowNodeData>[] {
   return nodes.filter((n) => n.data.stepType === type && n.id !== currentId);
 }
-
-// ---------- sub-forms ----------
 
 function TriggerForm({
   config,
@@ -128,6 +129,7 @@ function LLMForm({
             <SelectItem value="gpt-4o">gpt-4o</SelectItem>
             <SelectItem value="gpt-4.1-mini">gpt-4.1-mini</SelectItem>
             <SelectItem value="gpt-4.1">gpt-4.1</SelectItem>
+            <SelectItem value="gpt-5.2">gpt-5.2</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -287,6 +289,7 @@ function JudgeForm({
             <SelectItem value="gpt-4o">gpt-4o</SelectItem>
             <SelectItem value="gpt-4.1-mini">gpt-4.1-mini</SelectItem>
             <SelectItem value="gpt-4.1">gpt-4.1</SelectItem>
+            <SelectItem value="gpt-5.2">gpt-5.2</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -546,7 +549,6 @@ function ConnectorForm({
 
       <Separator />
 
-      {/* Type-specific param fields */}
       {config.connectorType === "slack" && (
         <div className="space-y-5">
           <div className="space-y-2">
@@ -733,31 +735,432 @@ function ConditionForm({
   );
 }
 
-// ---------- main component ----------
+function AgentForm({
+  config,
+  onUpdate,
+}: {
+  config: AgentStepConfig;
+  onUpdate: (updates: Partial<AgentStepConfig>) => void;
+}) {
+  const tools = config.tools ?? [];
+
+  function updateTool(index: number, updates: Partial<AgentToolRef>) {
+    const newTools = tools.map((t, i) =>
+      i === index ? { ...t, ...updates } : t
+    );
+    onUpdate({ tools: newTools });
+  }
+
+  function addTool() {
+    onUpdate({
+      tools: [
+        ...tools,
+        { type: "connector", connectorType: "slack", action: "send_message" },
+      ],
+    });
+  }
+
+  function removeTool(index: number) {
+    onUpdate({ tools: tools.filter((_, i) => i !== index) });
+  }
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <Label className="text-xs font-heading">Model</Label>
+        <Select
+          value={config.model}
+          onValueChange={(v) => onUpdate({ model: v })}
+        >
+          <SelectTrigger className={`w-full ${fieldClass}`}>
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="gpt-4o-mini">gpt-4o-mini</SelectItem>
+            <SelectItem value="gpt-4o">gpt-4o</SelectItem>
+            <SelectItem value="gpt-4.1-mini">gpt-4.1-mini</SelectItem>
+            <SelectItem value="gpt-4.1">gpt-4.1</SelectItem>
+            <SelectItem value="gpt-5.2">gpt-5.2</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-heading">System Prompt</Label>
+        <Textarea
+          className={fieldClass}
+          rows={4}
+          value={config.systemPrompt}
+          onChange={(e) => onUpdate({ systemPrompt: e.target.value })}
+          placeholder="You are a helpful agent..."
+        />
+      </div>
+
+      <div className="space-y-2">
+        <Label className="text-xs font-heading">Task Prompt</Label>
+        <Textarea
+          className={fieldClass}
+          rows={4}
+          value={config.taskPrompt}
+          onChange={(e) => onUpdate({ taskPrompt: e.target.value })}
+          placeholder="Use {{input.field}} or {{steps.stepId.field}} for interpolation"
+        />
+        <p className="text-xs text-muted-foreground/60">
+          {"Supports {{input.field}} and {{steps.stepId.field}} interpolation"}
+        </p>
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-heading">Temperature</Label>
+          <span className="text-xs text-muted-foreground/60">
+            {config.temperature}
+          </span>
+        </div>
+        <Slider
+          value={[config.temperature]}
+          min={0}
+          max={2}
+          step={0.1}
+          onValueChange={([v]) => onUpdate({ temperature: v })}
+        />
+      </div>
+
+      <div className="space-y-2">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-heading">Max Iterations</Label>
+          <span className="text-xs text-muted-foreground/60">
+            {config.maxIterations}
+          </span>
+        </div>
+        <Slider
+          value={[config.maxIterations]}
+          min={1}
+          max={30}
+          step={1}
+          onValueChange={([v]) => onUpdate({ maxIterations: v })}
+        />
+      </div>
+
+      <Separator />
+
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <Label className="text-xs font-heading">Tools</Label>
+          <Button variant="ghost" size="sm" onClick={addTool}>
+            <Plus className="size-3 mr-1" /> Add
+          </Button>
+        </div>
+        {tools.map((tool, i) => (
+          <div
+            key={i}
+            className="space-y-2 rounded-lg border border-border/60 p-3"
+          >
+            <div className="flex items-center justify-between">
+              <span className="text-[11px] font-medium text-muted-foreground/60">
+                Tool {i + 1}
+              </span>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => removeTool(i)}
+              >
+                <Trash2 className="size-3" />
+              </Button>
+            </div>
+            <Select
+              value={tool.type}
+              onValueChange={(v) =>
+                updateTool(i, {
+                  type: v as AgentToolRef["type"],
+                  ...(v === "connector"
+                    ? { connectorType: "slack", action: "send_message" }
+                    : {}),
+                  ...(v === "custom_function"
+                    ? { functionName: "", functionDescription: "" }
+                    : {}),
+                })
+              }
+            >
+              <SelectTrigger className={`w-full ${fieldClass}`}>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="connector">Connector</SelectItem>
+                <SelectItem value="custom_function">Custom Function</SelectItem>
+              </SelectContent>
+            </Select>
+
+            {tool.type === "connector" && (
+              <>
+                <Select
+                  value={tool.connectorType ?? "slack"}
+                  onValueChange={(v) =>
+                    updateTool(i, { connectorType: v as ConnectorType })
+                  }
+                >
+                  <SelectTrigger className={`w-full ${fieldClass}`}>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="slack">Slack</SelectItem>
+                    <SelectItem value="http">HTTP</SelectItem>
+                    <SelectItem value="email">Email</SelectItem>
+                    <SelectItem value="notion">Notion</SelectItem>
+                    <SelectItem value="google-sheets">Google Sheets</SelectItem>
+                  </SelectContent>
+                </Select>
+                <Input
+                  className={fieldClass}
+                  value={tool.action ?? ""}
+                  onChange={(e) => updateTool(i, { action: e.target.value })}
+                  placeholder="Action (e.g. send_message)"
+                />
+              </>
+            )}
+
+            {tool.type === "custom_function" && (
+              <>
+                <Input
+                  className={fieldClass}
+                  value={tool.functionName ?? ""}
+                  onChange={(e) =>
+                    updateTool(i, { functionName: e.target.value })
+                  }
+                  placeholder="Function name"
+                />
+                <Input
+                  className={fieldClass}
+                  value={tool.functionDescription ?? ""}
+                  onChange={(e) =>
+                    updateTool(i, { functionDescription: e.target.value })
+                  }
+                  placeholder="Description"
+                />
+                <Textarea
+                  className={`${fieldClass} font-mono text-xs`}
+                  rows={3}
+                  value={
+                    tool.functionParameters
+                      ? JSON.stringify(tool.functionParameters, null, 2)
+                      : ""
+                  }
+                  onChange={(e) => {
+                    try {
+                      const parsed = JSON.parse(e.target.value);
+                      updateTool(i, { functionParameters: parsed });
+                    } catch (err) {
+                      void err;
+                    }
+                  }}
+                  placeholder='{"type": "object", "properties": {...}}'
+                />
+              </>
+            )}
+          </div>
+        ))}
+      </div>
+
+      <Separator />
+
+      <div className="flex items-center justify-between">
+        <Label className="text-xs font-heading">HITL Escalation</Label>
+        <Switch
+          checked={config.hitlOnLowConfidence}
+          onCheckedChange={(checked) =>
+            onUpdate({ hitlOnLowConfidence: checked === true })
+          }
+        />
+      </div>
+
+      {config.hitlOnLowConfidence && (
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label className="text-xs font-heading">Confidence Threshold</Label>
+            <span className="text-xs text-muted-foreground/60">
+              {config.confidenceThreshold}
+            </span>
+          </div>
+          <Slider
+            value={[config.confidenceThreshold]}
+            min={0}
+            max={1}
+            step={0.05}
+            onValueChange={([v]) => onUpdate({ confidenceThreshold: v })}
+          />
+        </div>
+      )}
+
+      <div className="space-y-2">
+        <Label className="text-xs font-heading">Output Schema</Label>
+        <Textarea
+          className={`${fieldClass} font-mono text-xs`}
+          rows={3}
+          value={
+            config.outputSchema
+              ? JSON.stringify(config.outputSchema, null, 2)
+              : ""
+          }
+          onChange={(e) => {
+            if (!e.target.value.trim()) {
+              onUpdate({ outputSchema: undefined });
+              return;
+            }
+            try {
+              const parsed = JSON.parse(e.target.value);
+              onUpdate({ outputSchema: parsed });
+            } catch (err) {
+              void err;
+            }
+          }}
+          placeholder='{"type": "object", "properties": {...}}'
+        />
+        <p className="text-xs text-muted-foreground/60">
+          Optional JSON Schema for structured output
+        </p>
+      </div>
+    </div>
+  );
+}
+
+interface WorkflowBlock {
+  workflowId: string;
+  blockName: string;
+  blockDescription: string;
+  inputSchema: WorkflowBlockField[];
+}
+
+function SubWorkflowForm({
+  config,
+  onUpdate,
+}: {
+  config: SubWorkflowStepConfig;
+  onUpdate: (updates: Partial<SubWorkflowStepConfig>) => void;
+}) {
+  const [blocks, setBlocks] = useState<WorkflowBlock[]>([]);
+
+  useEffect(() => {
+    fetch("/api/workflow-blocks")
+      .then((res) => res.json())
+      .then((data) => setBlocks(data.blocks ?? []))
+      .catch(() => setBlocks([]));
+  }, []);
+
+  const selectedBlock = blocks.find((b) => b.workflowId === config.workflowId);
+
+  return (
+    <div className="space-y-5">
+      <div className="space-y-2">
+        <Label className="text-xs font-heading">Workflow Block</Label>
+        <Select
+          value={config.workflowId || ""}
+          onValueChange={(v) =>
+            onUpdate({ workflowId: v, inputMapping: {} })
+          }
+        >
+          <SelectTrigger className={`w-full ${fieldClass}`}>
+            <SelectValue placeholder="Select a workflow block..." />
+          </SelectTrigger>
+          <SelectContent>
+            {blocks.map((b) => (
+              <SelectItem key={b.workflowId} value={b.workflowId}>
+                {b.blockName}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+        {selectedBlock?.blockDescription && (
+          <p className="text-xs text-muted-foreground/60">
+            {selectedBlock.blockDescription}
+          </p>
+        )}
+      </div>
+
+      {!config.workflowId && (
+        <p className="text-xs text-muted-foreground/60 text-center py-4">
+          Select a workflow block to configure input mapping
+        </p>
+      )}
+
+      {selectedBlock && selectedBlock.inputSchema.length > 0 && (
+        <>
+          <Separator />
+          <div className="space-y-4">
+            <Label className="text-xs font-heading">Input Mapping</Label>
+            {selectedBlock.inputSchema.map((field) => (
+              <div key={field.name} className="space-y-1.5">
+                <Label className="text-xs font-heading">
+                  {field.name}
+                  {field.required && <span className="text-rose-500 ml-0.5">*</span>}
+                </Label>
+                {field.description && (
+                  <p className="text-xs text-muted-foreground/60">{field.description}</p>
+                )}
+                <Input
+                  className={fieldClass}
+                  value={config.inputMapping[field.name] ?? ""}
+                  onChange={(e) =>
+                    onUpdate({
+                      inputMapping: {
+                        ...config.inputMapping,
+                        [field.name]: e.target.value,
+                      },
+                    })
+                  }
+                  placeholder={`{{input.${field.name}}} or {{steps.stepId.field}}`}
+                />
+              </div>
+            ))}
+          </div>
+        </>
+      )}
+
+      {config.workflowId && !selectedBlock && (
+        <div className="space-y-2">
+          <Separator />
+          <Label className="text-xs font-heading">Workflow ID</Label>
+          <Input
+            className={fieldClass}
+            value={config.workflowId}
+            onChange={(e) => onUpdate({ workflowId: e.target.value })}
+            placeholder="Workflow ID"
+          />
+          <p className="text-xs text-muted-foreground/60">
+            Direct workflow ID (block not published yet)
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export function ConfigPanel({
   workflow,
   onCollapse,
+  className,
+  hideHeader,
 }: ConfigPanelProps): React.JSX.Element {
   const { selectedNode, updateNodeName, nodes } = workflow;
 
   if (!selectedNode) {
     return (
-      <div className="w-[300px] border-l bg-muted/30 flex flex-col h-full">
-        <div className="px-4 py-4 border-b bg-background flex items-center gap-2 shrink-0">
-          {onCollapse && (
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={onCollapse}
-              className="shrink-0 text-muted-foreground hover:text-foreground"
-              aria-label="Collapse Config panel"
-            >
-              <PanelRight className="size-4" />
-            </Button>
-          )}
-          <h2 className="font-heading text-sm">Configure</h2>
-        </div>
+      <div className={className ?? "w-[300px] border-l bg-muted/30 flex flex-col h-full"}>
+        {!hideHeader && (
+          <div className="px-4 py-4 border-b bg-background flex items-center gap-2 shrink-0">
+            {onCollapse && (
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={onCollapse}
+                className="shrink-0 text-muted-foreground hover:text-foreground"
+                aria-label="Collapse Config panel"
+              >
+                <PanelRight className="size-4" />
+              </Button>
+            )}
+            <h2 className="font-heading text-sm">Configure</h2>
+          </div>
+        )}
         <div className="flex-1 flex items-center justify-center">
           <div className="text-center px-8">
             <div className="size-10 rounded-full bg-muted flex items-center justify-center mx-auto mb-4">
@@ -783,24 +1186,25 @@ export function ConfigPanel({
   const config = selectedNode.config;
 
   return (
-    <div className="w-[300px] border-l bg-muted/30 flex flex-col h-full">
-      <div className="px-4 py-4 border-b bg-background flex items-center gap-2">
-        {onCollapse && (
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={onCollapse}
-            className="shrink-0 text-muted-foreground hover:text-foreground"
-            aria-label="Collapse Config panel"
-          >
-            <PanelRight className="size-4" />
-          </Button>
-        )}
-        <h2 className="font-heading text-sm">Configure</h2>
-      </div>
+    <div className={className ?? "w-[300px] border-l bg-muted/30 flex flex-col h-full"}>
+      {!hideHeader && (
+        <div className="px-4 py-4 border-b bg-background flex items-center gap-2">
+          {onCollapse && (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={onCollapse}
+              className="shrink-0 text-muted-foreground hover:text-foreground"
+              aria-label="Collapse Config panel"
+            >
+              <PanelRight className="size-4" />
+            </Button>
+          )}
+          <h2 className="font-heading text-sm">Configure</h2>
+        </div>
+      )}
       <ScrollArea className="flex-1 overflow-auto">
         <div className="p-5 space-y-5">
-          {/* Name field — all types */}
           <div className="space-y-2">
             <Label className="text-xs font-heading">Node Name</Label>
             <Input
@@ -812,7 +1216,6 @@ export function ConfigPanel({
 
           <Separator />
 
-          {/* Type-specific forms */}
           {selectedNode.type === "trigger" && (
             <TriggerForm
               config={config as TriggerStepConfig}
@@ -848,6 +1251,22 @@ export function ConfigPanel({
             <ConditionForm
               config={config as ConditionStepConfig}
               onUpdate={onUpdate}
+            />
+          )}
+          {selectedNode.type === "agent" && (
+            <AgentForm
+              config={config as AgentStepConfig}
+              onUpdate={(updates) =>
+                onUpdate({ ...config, ...updates } as StepConfig)
+              }
+            />
+          )}
+          {selectedNode.type === "sub-workflow" && (
+            <SubWorkflowForm
+              config={config as SubWorkflowStepConfig}
+              onUpdate={(updates) =>
+                onUpdate({ ...config, ...updates } as StepConfig)
+              }
             />
           )}
         </div>

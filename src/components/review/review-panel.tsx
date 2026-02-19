@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useImperativeHandle } from "react";
 import { useRouter } from "next/navigation";
 import type { ReviewItem, HITLStepConfig } from "@/lib/engine/types";
 import { Button } from "@/components/ui/button";
@@ -30,12 +30,17 @@ interface CardProps {
   ref: (el: HTMLElement | null) => void;
 }
 
+export interface ReviewPanelHandle {
+  approve: () => void;
+}
+
 interface ReviewPanelProps {
   review: ReviewItem;
   getCardProps?: (index: number) => CardProps;
+  actionRef?: React.Ref<ReviewPanelHandle>;
 }
 
-export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
+export function ReviewPanel({ review, getCardProps, actionRef }: ReviewPanelProps) {
   const router = useRouter();
   const [comment, setComment] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -89,7 +94,7 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
         setError(data.error || "Failed to submit decision");
         return;
       }
-      router.push("/review");
+      router.push(`/runs/${review.run.id}`);
     } catch {
       setError("Network error. Please try again.");
     } finally {
@@ -100,6 +105,10 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
   function handleApprove() {
     submitDecision("approve");
   }
+
+  useImperativeHandle(actionRef, () => ({
+    approve: handleApprove,
+  }));
 
   function handleEditApprove() {
     setEditing(true);
@@ -123,11 +132,9 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
 
   return (
     <div className="space-y-8">
-      {/* Two-column layout */}
       <div
         className={`grid gap-6 ${hasJudge ? "grid-cols-1 lg:grid-cols-2" : "grid-cols-1"}`}
       >
-        {/* Left Column — Content Under Review */}
         <Card
           className={getCardProps?.(0)?.["data-keyboard-focused"] ? "outline outline-2 outline-orange-500/50 outline-offset-[-2px]" : ""}
           ref={getCardProps?.(0)?.ref}
@@ -136,14 +143,12 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
             <h2 className="font-heading text-lg">Output to Review</h2>
           </CardHeader>
           <CardContent className="px-6 pb-6 space-y-4">
-            {/* HITL instructions */}
             {config.instructions && (
               <div className="rounded-lg border-l-2 border-muted-foreground/20 bg-muted/30 px-4 py-3 text-sm text-muted-foreground">
                 {config.instructions}
               </div>
             )}
 
-            {/* Prior step outputs */}
             {editing && primaryOutput ? (
               <OutputEditor
                 initialOutput={primaryOutput}
@@ -180,7 +185,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
               })
             )}
 
-            {/* Workflow Input (collapsible) */}
             <Collapsible open={inputOpen} onOpenChange={setInputOpen}>
               <CollapsibleTrigger className="flex items-center gap-1 text-sm font-medium hover:underline cursor-pointer">
                 {inputOpen ? (
@@ -199,7 +203,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
           </CardContent>
         </Card>
 
-        {/* Right Column — Judge Assessment */}
         {review.judgeAssessment && (
           <JudgeAssessment
             assessment={review.judgeAssessment}
@@ -208,7 +211,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
         )}
       </div>
 
-      {/* Bottom — Action Bar */}
       {(() => {
         const actionIdx = hasJudge ? 2 : 1;
         const actionProps = getCardProps?.(actionIdx);
@@ -261,7 +263,6 @@ export function ReviewPanel({ review, getCardProps }: ReviewPanelProps) {
         );
       })()}
 
-      {/* Reject Confirmation Dialog */}
       <Dialog open={rejectDialogOpen} onOpenChange={setRejectDialogOpen}>
         <DialogContent>
           <DialogHeader>

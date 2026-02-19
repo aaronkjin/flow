@@ -6,7 +6,6 @@ interface UseKeyboardNavOptions {
   itemCount: number;
   onSelect: (index: number) => void;
   enabled?: boolean;
-  /** Number of columns for 2D grid navigation. Left/Right moves within a row, Up/Down between rows. Default: 1. */
   gridColumns?: number;
 }
 
@@ -44,10 +43,8 @@ export function useKeyboardNav({
   );
   const itemRefs = useRef<Map<number, HTMLElement>>(new Map());
 
-  // Clamp focused index to valid range without an effect
   const focusedIndex = rawFocusedIndex >= itemCount ? -1 : rawFocusedIndex;
 
-  // Scroll into view when focusedIndex changes via keyboard
   const scrollToFocused = useCallback((index: number) => {
     const el = itemRefs.current.get(index);
     if (el) {
@@ -154,9 +151,7 @@ export function useKeyboardNav({
         setFocusedIndex(index);
         setFocusSource("mouse");
       },
-      onMouseLeave: () => {
-        // Keep the index — don't reset on mouse leave
-      },
+      onMouseLeave: () => {},
       onClick: () => onSelect(index),
       ref: (el: HTMLElement | null) => {
         if (el) {

@@ -6,6 +6,8 @@ import { buildReviewItem } from "../route";
 
 const VALID_ACTIONS = new Set(["approve", "edit", "reject"]);
 
+export const dynamic = "force-dynamic";
+
 export async function GET(
   _request: NextRequest,
   { params }: { params: Promise<{ runId: string }> }

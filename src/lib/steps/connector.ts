@@ -1,6 +1,6 @@
 import type { InterpolationContext } from "@/lib/engine/types";
 import { getConnector, getRegisteredTypes } from "@/lib/connectors/registry";
-import "@/lib/connectors"; // side-effect imports register available connectors
+import "@/lib/connectors";
 
 export async function executeConnectorStep(
   config: Record<string, unknown>,

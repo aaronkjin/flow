@@ -1,5 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import { getRunStore } from "@/lib/persistence/store";
+import { getRunStore, readJsonArray, getTracePath } from "@/lib/persistence/store";
+import type { TraceEvent } from "@/lib/engine/types";
+
+export const dynamic = "force-dynamic";
 
 export async function GET(
   _request: NextRequest,
@@ -15,5 +18,9 @@ export async function GET(
     );
   }
 
-  return NextResponse.json({ run });
+  const traceEvents = readJsonArray<TraceEvent>(getTracePath(runId));
+
+  return NextResponse.json({ run, traceEvents }, {
+    headers: { "Cache-Control": "no-store, max-age=0" },
+  });
 }

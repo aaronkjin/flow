@@ -41,7 +41,6 @@ export default function RunDetailPage() {
 
   const isContentActive = activeZone === "content";
 
-  // Reset trace nav when leaving content zone
   useEffect(() => {
     if (!isContentActive) setTraceNavActive(false);
   }, [isContentActive]);
@@ -49,14 +48,23 @@ export default function RunDetailPage() {
   const fetchRunData = useCallback(async () => {
     try {
       const [runRes, traceRes] = await Promise.all([
-        fetch(`/api/runs/${runId}`),
-        fetch(`/api/runs/${runId}/trace`),
+        fetch(`/api/runs/${runId}`, { cache: "no-store" }),
+        fetch(`/api/runs/${runId}/trace`, { cache: "no-store" }),
       ]);
+
+      let traceEventsFromRun: TraceEvent[] = [];
+
       if (runRes.ok) {
-        const { run } = (await runRes.json()) as { run: Run };
-        setRun(run);
-        if (run?.workflowId) {
-          const wfRes = await fetch(`/api/workflows/${run.workflowId}`);
+        const runData = await runRes.json();
+        const fetchedRun = runData.run as Run;
+        setRun(fetchedRun);
+
+        if (Array.isArray(runData.traceEvents)) {
+          traceEventsFromRun = runData.traceEvents;
+        }
+
+        if (fetchedRun?.workflowId) {
+          const wfRes = await fetch(`/api/workflows/${fetchedRun.workflowId}`);
           if (wfRes.ok) {
             const { workflow } = (await wfRes.json()) as {
               workflow: WorkflowDefinition;
@@ -65,9 +73,19 @@ export default function RunDetailPage() {
           }
         }
       }
+
       if (traceRes.ok) {
         const data = await traceRes.json();
-        setEvents(data.events ?? data ?? []);
+        const evts = data.events ?? data;
+        if (Array.isArray(evts) && evts.length > 0) {
+          setEvents(evts);
+        } else if (traceEventsFromRun.length > 0) {
+          setEvents(traceEventsFromRun);
+        } else {
+          setEvents([]);
+        }
+      } else if (traceEventsFromRun.length > 0) {
+        setEvents(traceEventsFromRun);
       }
     } finally {
       setLoading(false);
@@ -93,13 +111,17 @@ export default function RunDetailPage() {
     return () => window.removeEventListener("focus", onFocus);
   }, [fetchRunData]);
 
-  // Card indices
-  const cardCount = workflow ? 3 : 2;
-  const statusIdx = 0;
-  const progressIdx = workflow ? 1 : -1;
-  const traceIdx = workflow ? 2 : 1;
+  const hasTokenUsage = !!run?.tokenUsage;
+  const hasAgentSummary = events.some((e) => e.type === "agent_complete");
 
-  // Card-level nav: disabled when drilling into trace events
+  let cardIdx = 0;
+  const statusIdx = cardIdx++;
+  const progressIdx = workflow ? cardIdx++ : -1;
+  const tokenIdx = hasTokenUsage ? cardIdx++ : -1;
+  const agentIdx = hasAgentSummary ? cardIdx++ : -1;
+  const traceIdx = cardIdx++;
+  const cardCount = cardIdx;
+
   const cardOnSelect = useCallback(
     (index: number) => {
       if (index === statusIdx && run?.status === "waiting_for_review") {
@@ -116,7 +138,6 @@ export default function RunDetailPage() {
     enabled: isContentActive && !traceNavActive,
   });
 
-  // Trace event-level nav
   const traceOnSelect = useCallback(() => {}, []);
   const { focusedIndex: traceFocusedIndex } = useKeyboardNav({
     itemCount: events.length,
@@ -124,7 +145,6 @@ export default function RunDetailPage() {
     enabled: traceNavActive,
   });
 
-  // Escape from trace mode: capture phase prevents zone nav from also unlocking
   useEffect(() => {
     if (!traceNavActive) return;
     function handleEscape(e: KeyboardEvent) {
@@ -163,7 +183,6 @@ export default function RunDetailPage() {
     return formatDuration(end - start);
   })();
 
-  // Card outline: only use data-keyboard-focused (no mouse handlers on cards for sticky focus)
   const cardOutline = (idx: number) => {
     const props = getItemProps(idx);
     return props["data-keyboard-focused"]
@@ -182,7 +201,6 @@ export default function RunDetailPage() {
       />
 
       <div className="p-8 space-y-8">
-        {/* Status section */}
         <Card
           className={cardOutline(statusIdx)}
           ref={getItemProps(statusIdx).ref}
@@ -238,7 +256,6 @@ export default function RunDetailPage() {
           </CardContent>
         </Card>
 
-        {/* Step progress */}
         {workflow && (() => {
           return (
             <Card
@@ -255,7 +272,130 @@ export default function RunDetailPage() {
           );
         })()}
 
-        {/* Trace timeline */}
+        {run.tokenUsage && (
+          <Card
+            className={cardOutline(tokenIdx)}
+            ref={getItemProps(tokenIdx).ref}
+          >
+            <CardHeader className="px-6 pt-6 pb-4">
+              <h2 className="font-heading text-lg">Token Usage</h2>
+            </CardHeader>
+            <CardContent className="px-6 pb-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                <div>
+                  <span className="text-sm text-muted-foreground">Total Tokens</span>
+                  <p className="font-medium mt-0.5 tabular-nums">
+                    {run.tokenUsage.total.totalTokens.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Prompt</span>
+                  <p className="font-medium mt-0.5 tabular-nums">
+                    {run.tokenUsage.total.promptTokens.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Completion</span>
+                  <p className="font-medium mt-0.5 tabular-nums">
+                    {run.tokenUsage.total.completionTokens.toLocaleString()}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Estimated Cost</span>
+                  <p className="font-medium mt-0.5 tabular-nums">
+                    ${run.tokenUsage.estimatedCostUsd < 0.01
+                      ? run.tokenUsage.estimatedCostUsd.toFixed(4)
+                      : run.tokenUsage.estimatedCostUsd.toFixed(2)}
+                  </p>
+                </div>
+              </div>
+
+              {Object.keys(run.tokenUsage.byStep).length > 0 && (
+                <div className="mt-4 pt-4 border-t border-border/40">
+                  <span className="text-sm font-heading text-muted-foreground">Per Step</span>
+                  <div className="mt-2 space-y-1">
+                    {Object.entries(run.tokenUsage.byStep).map(([stepId, usage]) => {
+                      const stepDef = workflow?.steps.find((s) => s.id === stepId);
+                      return (
+                        <div key={stepId} className="flex items-center justify-between text-sm">
+                          <span className="text-muted-foreground truncate">
+                            {stepDef?.name ?? stepId.slice(0, 8)}
+                          </span>
+                          <span className="tabular-nums font-mono text-xs text-muted-foreground/60">
+                            {usage.totalTokens.toLocaleString()} tok
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+        {(() => {
+          const agentCompleteEvents = events.filter((e) => e.type === "agent_complete");
+          if (agentCompleteEvents.length === 0) return null;
+
+          const totalIterations = agentCompleteEvents.reduce(
+            (sum, e) => sum + ((e.data.totalIterations as number) ?? 0), 0
+          );
+          const stopReasons = agentCompleteEvents
+            .map((e) => e.data.stopReason as string)
+            .filter(Boolean);
+
+          const toolCallEvents = events.filter((e) => e.type === "agent_tool_call");
+          const toolCounts: Record<string, number> = {};
+          for (const e of toolCallEvents) {
+            const name = (e.data.toolName as string) ?? "unknown";
+            toolCounts[name] = (toolCounts[name] ?? 0) + 1;
+          }
+
+          return (
+            <Card
+              className={cardOutline(agentIdx)}
+              ref={getItemProps(agentIdx).ref}
+            >
+              <CardHeader className="px-6 pt-6 pb-4">
+                <h2 className="font-heading text-lg">Agent Summary</h2>
+              </CardHeader>
+              <CardContent className="px-6 pb-6">
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Total Iterations</span>
+                    <p className="font-medium mt-0.5 tabular-nums">{totalIterations}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Stop Reason</span>
+                    <p className="font-medium mt-0.5">{stopReasons.join(", ") || "\u2014"}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Tool Calls</span>
+                    <p className="font-medium mt-0.5 tabular-nums">{toolCallEvents.length}</p>
+                  </div>
+                </div>
+
+                {Object.keys(toolCounts).length > 0 && (
+                  <div className="mt-4 pt-4 border-t border-border/40">
+                    <span className="text-sm font-heading text-muted-foreground">Tools Used</span>
+                    <div className="mt-2 space-y-1">
+                      {Object.entries(toolCounts)
+                        .sort(([, a], [, b]) => b - a)
+                        .map(([name, count]) => (
+                          <div key={name} className="flex items-center justify-between text-sm">
+                            <span className="text-muted-foreground font-mono text-xs">{name}</span>
+                            <span className="tabular-nums text-xs text-muted-foreground/60">{count}x</span>
+                          </div>
+                        ))}
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          );
+        })()}
+
         <Card
           className={cardOutline(traceIdx)}
           ref={getItemProps(traceIdx).ref}

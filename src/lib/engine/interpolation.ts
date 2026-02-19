@@ -1,28 +1,17 @@
 import type { InterpolationContext } from "./types";
 
-/**
- * Resolve {{variable.path}} templates in a string.
- *
- * Supports:
- *   {{input.fieldName}}         — workflow input data
- *   {{steps.stepId.fieldName}}  — output from a completed step
- *   {{steps.stepId.nested.key}} — deep access
- */
 export function interpolate(
   template: string,
   context: InterpolationContext
 ): string {
   return template.replace(/\{\{([^}]+)\}\}/g, (match, path: string) => {
     const value = resolvePath(context, path.trim());
-    if (value === undefined || value === null) return match; // leave unresolved
+    if (value === undefined || value === null) return match;
     if (typeof value === "object") return JSON.stringify(value);
     return String(value);
   });
 }
 
-/**
- * Recursively interpolate all string values in an object/array.
- */
 export function interpolateObject(
   obj: unknown,
   context: InterpolationContext
@@ -43,21 +32,15 @@ export function interpolateObject(
   return obj;
 }
 
-/**
- * Evaluate a simple condition expression after interpolation.
- * Supports: ===, !==, >, <, >=, <=, and boolean values.
- */
 export function evaluateCondition(
   expression: string,
   context: InterpolationContext
 ): boolean {
   const resolved = interpolate(expression, context);
 
-  // Direct boolean values
   if (resolved === "true") return true;
   if (resolved === "false") return false;
 
-  // Comparison operators
   const operators = ["===", "!==", ">=", "<=", ">", "<"] as const;
   for (const op of operators) {
     const idx = resolved.indexOf(op);
@@ -68,11 +51,8 @@ export function evaluateCondition(
     }
   }
 
-  // Truthy check
   return resolved !== "" && resolved !== "0" && resolved !== "null" && resolved !== "undefined";
 }
-
-// --- Internal helpers ---
 
 function resolvePath(obj: unknown, path: string): unknown {
   const parts = path.split(".");
@@ -92,11 +72,9 @@ function compare(
   op: "===" | "!==" | ">" | "<" | ">=" | "<=",
   right: string
 ): boolean {
-  // Strip surrounding quotes for string comparison
   const l = stripQuotes(left);
   const r = stripQuotes(right);
 
-  // Try numeric comparison
   const ln = Number(l);
   const rn = Number(r);
   if (!isNaN(ln) && !isNaN(rn)) {
@@ -110,7 +88,6 @@ function compare(
     }
   }
 
-  // String comparison
   switch (op) {
     case "===": return l === r;
     case "!==": return l !== r;

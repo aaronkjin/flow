@@ -67,6 +67,12 @@ ${contentToJudge}`;
       issues: ["Failed to parse judge response"],
       recommendation: "flag",
       reasoning: rawContent,
+      model: response.model,
+      usage: {
+        promptTokens: response.usage?.prompt_tokens ?? 0,
+        completionTokens: response.usage?.completion_tokens ?? 0,
+        totalTokens: response.usage?.total_tokens ?? 0,
+      },
     };
   }
 
@@ -87,5 +93,11 @@ ${contentToJudge}`;
     issues: (parsed.issues as string[]) ?? [],
     recommendation,
     reasoning: (parsed.reasoning as string) ?? "",
+    model: response.model,
+    usage: {
+      promptTokens: response.usage?.prompt_tokens ?? 0,
+      completionTokens: response.usage?.completion_tokens ?? 0,
+      totalTokens: response.usage?.total_tokens ?? 0,
+    },
   };
 }
