@@ -2,7 +2,7 @@
 
 A knowledge work automation platform
 
-<img width="1604" height="1040" alt="Image" src="https://github.com/user-attachments/assets/cf14cc71-1ecf-45c8-ab23-28d308e4b16c" />
+<img width="1604" height="1040" alt="Image" src="https://github.com/user-attachments/assets/106ff921-84cb-4b1d-9737-45cc305cad22" />
 
 ## Getting Started
 
