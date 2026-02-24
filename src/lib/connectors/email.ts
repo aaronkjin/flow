@@ -19,7 +19,7 @@ const emailConnector: Connector = {
       };
     }
 
-    const from = (params.from as string) || "Action <onboarding@resend.dev>";
+    const from = (params.from as string) || "Flow <onboarding@resend.dev>";
     const body: Record<string, unknown> = {
       from,
       to: params.to,

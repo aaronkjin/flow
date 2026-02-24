@@ -558,7 +558,7 @@ function ConnectorForm({
               rows={4}
               value={params.text ?? ""}
               onChange={(e) => setParam("text", e.target.value)}
-              placeholder="Hello from Action! Supports {{interpolation}}"
+              placeholder="Hello from Flow! Supports {{interpolation}}"
             />
           </div>
           <div className="space-y-2">
@@ -1170,8 +1170,8 @@ export function ConfigPanel({
               No node selected
             </p>
             <p className="text-xs text-muted-foreground/60 mt-1">
-              Click a node on the canvas to take{" "}
-              <span className="font-heading italic">Action</span>
+              Click a node on the canvas to find your{" "}
+              <span className="font-heading italic">Flow</span>
             </p>
           </div>
         </div>

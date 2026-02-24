@@ -16,7 +16,7 @@ import { compileCopilotDraft } from "./compile-draft";
 const MODEL = "gpt-5.2";
 
 function buildRefineSystemPrompt(): string {
-  return `You are a workflow refinement assistant for ActionFlow. The user has an existing workflow and wants to modify it.
+  return `You are a workflow refinement assistant for Flow. The user has an existing workflow and wants to modify it.
 
 ## Your Task
 Return a JSON object with an "operations" array containing patch operations to apply to the current workflow. Use the MINIMUM number of operations needed.

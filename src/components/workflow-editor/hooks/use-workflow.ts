@@ -151,7 +151,7 @@ const DEFAULT_CONFIGS: Record<StepType, StepConfig> = {
 
 const DEFAULT_LABELS: Record<StepType, string> = {
   trigger: "Trigger",
-  llm: "LLM Action",
+  llm: "LLM Call",
   judge: "Judge",
   hitl: "HITL Review",
   connector: "Connector",

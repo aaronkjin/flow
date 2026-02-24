@@ -31,7 +31,7 @@ export default async function Icon() {
         color: "#18181b",
       }}
     >
-      A
+      F
     </div>,
     {
       ...size,

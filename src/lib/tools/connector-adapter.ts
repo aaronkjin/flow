@@ -87,7 +87,7 @@ const CONNECTOR_ACTION_MAP: Record<string, ConnectorActionMeta[]> = {
           from: {
             type: "string",
             description:
-              "Sender address (optional, defaults to 'Action <onboarding@resend.dev>')",
+              "Sender address (optional, defaults to 'Flow <onboarding@resend.dev>')",
           },
           replyTo: {
             type: "string",

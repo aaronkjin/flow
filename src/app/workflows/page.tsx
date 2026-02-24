@@ -116,7 +116,7 @@ export default function WorkflowsPage() {
             <div>
               <h2 className="font-heading text-lg">No workflows yet</h2>
               <p className="text-muted-foreground mt-1">
-                Create your first workflow and put it into <span className="font-heading italic">Action</span>.
+                Create your first workflow and put it into <span className="font-heading italic">Flow</span>.
               </p>
             </div>
           </div>

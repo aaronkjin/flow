@@ -22,7 +22,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Action",
+  title: "Flow",
   description: "Knowledge work automation platform",
 };
 

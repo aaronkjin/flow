@@ -274,7 +274,7 @@ export function CopilotPanel({ workflow }: CopilotPanelProps) {
             </div>
             <p className="text-sm font-heading text-muted-foreground/90">
               Put a workflow into{" "}
-              <span className="font-heading italic">Action</span>
+              <span className="font-heading italic">Flow</span>
             </p>
             <p className="text-xs text-muted-foreground/40 mt-2">
               e.g. &ldquo;Triage support tickets, score urgency, notify

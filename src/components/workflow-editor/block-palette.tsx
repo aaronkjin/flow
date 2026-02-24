@@ -61,7 +61,7 @@ const categories: PaletteCategory[] = [
     name: "AI",
     items: [
       {
-        label: "LLM Action",
+        label: "LLM Call",
         description: "Run an LLM prompt",
         stepType: "llm",
         icon: Sparkles,
@@ -76,7 +76,7 @@ const categories: PaletteCategory[] = [
       },
       {
         label: "Agent",
-        description: <><span className="font-heading italic">Action</span>-driven agent</>,
+        description: <><span className="font-heading italic">Flow</span>-driven agent</>,
         stepType: "agent" as StepType,
         icon: Bot,
         dragData: {},

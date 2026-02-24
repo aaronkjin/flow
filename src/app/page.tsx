@@ -229,7 +229,7 @@ export default function DashboardPage() {
               <h2 className="font-heading text-lg">No runs yet</h2>
               <p className="text-muted-foreground mt-1">
                 Put a workflow into{" "}
-                <span className="font-heading italic">Action</span>.
+                <span className="font-heading italic">Flow</span>.
               </p>
             </div>
           </div>

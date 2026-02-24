@@ -140,7 +140,7 @@ export default function ReviewQueuePage() {
               <h2 className="font-heading text-lg">No pending reviews</h2>
               <p className="text-muted-foreground mt-1">
                 When a workflow pauses for human review, it is time for you to
-                take <span className="font-heading italic">Action</span>.
+                find your <span className="font-heading italic">Flow</span>.
               </p>
             </div>
           </div>

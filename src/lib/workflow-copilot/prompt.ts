@@ -2,7 +2,7 @@
 import type { CopilotDraftStep, CopilotDraftEdge } from "./types";
 
 export function buildSystemPrompt(): string {
-  return `You are a workflow design assistant for ActionFlow. You generate structured workflow definitions as JSON.
+  return `You are a workflow design assistant for Flow. You generate structured workflow definitions as JSON.
 
 ## Available Step Types
 

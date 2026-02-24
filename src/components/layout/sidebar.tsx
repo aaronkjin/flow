@@ -43,7 +43,7 @@ function NavContent({
           href="/"
           className="font-heading text-5xl tracking-tight italic hover:opacity-80 transition-opacity"
         >
-          Action
+          Flow
         </Link>
       </div>
 
@@ -83,7 +83,7 @@ function NavContent({
   );
 }
 
-const SIDEBAR_COLLAPSED_KEY = "action-sidebar-collapsed";
+const SIDEBAR_COLLAPSED_KEY = "flow-sidebar-collapsed";
 
 export function Sidebar() {
   const pathname = usePathname();
@@ -173,7 +173,7 @@ export function Sidebar() {
                 href="/"
                 className="font-heading text-2xl tracking-tight italic hover:opacity-80 transition-opacity"
               >
-                A
+                F
               </Link>
             </div>
             <div className="flex flex-col items-center py-3 gap-3 flex-1">
@@ -227,7 +227,7 @@ export function Sidebar() {
                 href="/"
                 className="font-heading text-5xl tracking-tight italic hover:opacity-80 transition-opacity"
               >
-                Action
+                Flow
               </Link>
             </div>
             <nav className="flex-1 flex flex-col gap-1 px-3">
